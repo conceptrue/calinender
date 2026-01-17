@@ -116,7 +116,7 @@ function DayDetailContent({
 
   return (
     <>
-      <DialogHeader>
+      <DialogHeader className="sticky top-0 bg-background pb-4 -mt-2 pt-2 z-10">
         <DialogTitle className="capitalize">{formattedDate}</DialogTitle>
       </DialogHeader>
 
@@ -291,8 +291,8 @@ function DayDetailContent({
         </div>
 
         {/* Save Button */}
-        <div className="flex justify-end pt-2">
-          <Button onClick={handleSave}>Opslaan</Button>
+        <div className="flex justify-end pt-4 sticky bottom-0 bg-background pb-2 -mb-2">
+          <Button onClick={handleSave} className="w-full sm:w-auto">Opslaan</Button>
         </div>
       </div>
     </>
