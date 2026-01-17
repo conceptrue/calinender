@@ -71,7 +71,7 @@ export default function Home() {
     return (
       <div className="flex min-h-screen bg-background">
         <Sidebar activeView={activeView} onViewChange={setActiveView} />
-        <main className="flex-1 p-6 md:ml-52">
+        <main className="flex-1 p-6">
           <p className="text-muted-foreground">Laden...</p>
         </main>
       </div>
@@ -97,7 +97,7 @@ export default function Home() {
     <div className="flex min-h-screen bg-background">
       <Sidebar activeView={activeView} onViewChange={setActiveView} />
 
-      <main className="flex-1 p-4 md:p-6 pt-16 md:pt-6 md:ml-52">
+      <main className="flex-1 p-4 md:p-6 pt-16 md:pt-6">
         {/* Kalender View */}
         {activeView === "kalender" && (
           <div className="max-w-6xl mx-auto">
