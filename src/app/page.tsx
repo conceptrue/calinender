@@ -71,7 +71,7 @@ export default function Home() {
     return (
       <div className="flex min-h-screen bg-background">
         <Sidebar activeView={activeView} onViewChange={setActiveView} />
-        <main className="flex-1 p-6 md:ml-16">
+        <main className="flex-1 p-6 md:ml-52">
           <p className="text-muted-foreground">Laden...</p>
         </main>
       </div>
@@ -97,7 +97,7 @@ export default function Home() {
     <div className="flex min-h-screen bg-background">
       <Sidebar activeView={activeView} onViewChange={setActiveView} />
 
-      <main className="flex-1 p-4 md:p-6 pt-16 md:pt-6 md:ml-16">
+      <main className="flex-1 p-4 md:p-6 pt-16 md:pt-6 md:ml-52">
         {/* Kalender View */}
         {activeView === "kalender" && (
           <div className="max-w-6xl mx-auto">
@@ -105,7 +105,7 @@ export default function Home() {
             <div className="mb-6">
               <h1 className="text-2xl font-semibold">Kalender</h1>
               <p className="text-muted-foreground">
-                Privé - alle data blijft lokaal op je apparaat
+                Volg je cyclus privé en lokaal
               </p>
             </div>
 

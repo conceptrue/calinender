@@ -25,7 +25,6 @@ const navItems: NavItem[] = [
 ];
 
 export function Sidebar({ activeView, onViewChange }: SidebarProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   return (
@@ -51,28 +50,23 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
       <aside
         className={cn(
           "fixed md:sticky top-0 left-0 z-50 h-screen bg-sidebar border-r border-sidebar-border flex flex-col transition-all duration-300",
-          // Desktop: collapsed (64px) or expanded (280px) on hover
-          "md:w-16 md:hover:w-70",
+          // Desktop: always expanded (200px)
+          "md:w-52",
           // Mobile: hidden by default, full width when open
           isMobileOpen ? "w-70 translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
-        onMouseEnter={() => setIsExpanded(true)}
-        onMouseLeave={() => setIsExpanded(false)}
       >
         {/* Header */}
         <div className="flex items-center h-16 px-4 border-b border-sidebar-border">
           {/* Logo icon */}
           <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-rose-500 to-rose-600 flex items-center justify-center">
-            <span className="text-white text-sm font-bold">M</span>
+            <span className="text-white text-sm font-bold">C</span>
           </div>
 
-          {/* App name - visible when expanded */}
-          <div className={cn(
-            "ml-3 overflow-hidden transition-all duration-300",
-            isExpanded || isMobileOpen ? "opacity-100 w-auto" : "opacity-0 w-0 md:group-hover:opacity-100"
-          )}>
+          {/* App name - always visible on desktop */}
+          <div className="ml-3">
             <p className="font-semibold text-sidebar-foreground whitespace-nowrap">
-              Menstruatiekalender
+              Calinender
             </p>
             <p className="text-xs text-muted-foreground whitespace-nowrap">
               Privé & lokaal
@@ -120,10 +114,7 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
                       isActive && "text-rose-500"
                     )} />
 
-                    <span className={cn(
-                      "whitespace-nowrap transition-all duration-300",
-                      isExpanded || isMobileOpen ? "opacity-100" : "opacity-0 w-0 overflow-hidden"
-                    )}>
+                    <span className="whitespace-nowrap">
                       {item.label}
                     </span>
                   </button>
@@ -134,10 +125,7 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
         </nav>
 
         {/* Footer */}
-        <div className={cn(
-          "p-4 border-t border-sidebar-border transition-all duration-300",
-          isExpanded || isMobileOpen ? "opacity-100" : "opacity-0"
-        )}>
+        <div className="p-4 border-t border-sidebar-border">
           <p className="text-xs text-muted-foreground">
             Alle data blijft lokaal
           </p>
