@@ -93,6 +93,61 @@ function getAllPhaseRecipes(cycleLength: number): Phase[] {
           ],
           tip: "Bevries je bananen in stukjes voor een extra romige smoothie!"
         },
+        {
+          name: "Rundvlees stoofpot",
+          emoji: "🥘",
+          ingredients: ["400g runderstoofvlees", "3 wortels", "2 aardappels", "1 ui", "2 teentjes knoflook", "500ml runderbouillon", "2 el tomatenpuree", "Tijm", "Laurier"],
+          description: "Hartverwarmende stoofpot rijk aan ijzer en B12.",
+          prepTime: "2 uur",
+          servings: 4,
+          steps: [
+            "Snijd het vlees in blokjes en dep droog",
+            "Bak het vlees rondom bruin in een braadpan",
+            "Haal het vlees eruit en fruit de ui en knoflook",
+            "Voeg tomatenpuree toe en roer 1 minuut",
+            "Doe het vlees terug en voeg bouillon, tijm en laurier toe",
+            "Laat 1,5 uur sudderen op laag vuur",
+            "Voeg de groenten toe en kook nog 30 minuten",
+            "Breng op smaak met zout en peper"
+          ],
+          tip: "Rundvlees is een van de beste bronnen van heemijzer, dat makkelijk wordt opgenomen."
+        },
+        {
+          name: "Warme havermout met kaneel",
+          emoji: "🥣",
+          ingredients: ["80g havermout", "250ml melk", "1 banaan", "1 tl kaneel", "1 el honing", "Handvol walnoten", "1 el lijnzaad"],
+          description: "Troostend ontbijt dat energie geeft en krampen vermindert.",
+          prepTime: "10 min",
+          servings: 1,
+          steps: [
+            "Breng melk aan de kook in een pannetje",
+            "Voeg havermout toe en roer goed",
+            "Laat 5 minuten zachtjes koken terwijl je roert",
+            "Voeg kaneel en lijnzaad toe",
+            "Schep in een kom",
+            "Top met plakjes banaan, walnoten en honing"
+          ],
+          tip: "Kaneel helpt bij het stabiliseren van je bloedsuiker en vermindert krampen."
+        },
+        {
+          name: "Kippenlever met ui",
+          emoji: "🍳",
+          ingredients: ["300g kippenlever", "2 uien", "2 el boter", "1 tl tijm", "Splash cognac (optioneel)", "Zout en peper", "Peterselie"],
+          description: "Supervol ijzer en B-vitamines. Traditioneel gerecht voor bloedopbouw.",
+          prepTime: "20 min",
+          servings: 2,
+          steps: [
+            "Maak de levers schoon en dep droog",
+            "Snijd de uien in halve ringen",
+            "Smelt boter in een pan en bak de uien zacht",
+            "Haal de uien uit de pan en bak de levers op hoog vuur",
+            "Voeg tijm, zout en peper toe",
+            "Blus af met cognac indien gewenst",
+            "Doe de uien terug in de pan",
+            "Garneer met peterselie en serveer met brood"
+          ],
+          tip: "Kippenlever bevat 3x zoveel ijzer als spinazie!"
+        },
       ],
     },
     {
@@ -160,6 +215,60 @@ function getAllPhaseRecipes(cycleLength: number): Phase[] {
           ],
           tip: "Griekse yoghurt bevat probiotica die helpen bij hormoonbalans."
         },
+        {
+          name: "Quinoa tabbouleh",
+          emoji: "🥗",
+          ingredients: ["150g quinoa", "1 bos peterselie", "1 bos munt", "3 tomaten", "1 komkommer", "Sap van 2 citroenen", "4 el olijfolie", "Zout en peper"],
+          description: "Frisse salade vol plantaardige eiwitten en ijzer.",
+          prepTime: "25 min",
+          servings: 4,
+          steps: [
+            "Kook de quinoa volgens de verpakking en laat afkoelen",
+            "Hak de peterselie en munt fijn",
+            "Snijd de tomaten en komkommer in kleine blokjes",
+            "Meng alles in een grote kom",
+            "Maak een dressing van citroensap, olijfolie, zout en peper",
+            "Giet de dressing over de salade",
+            "Meng goed en laat 15 minuten intrekken",
+            "Serveer op kamertemperatuur"
+          ],
+          tip: "Quinoa bevat alle 9 essentiële aminozuren - perfect voor celvernieuwing."
+        },
+        {
+          name: "Gegrilde kip met citroen",
+          emoji: "🍗",
+          ingredients: ["4 kipfilets", "2 citroenen", "4 teentjes knoflook", "2 el olijfolie", "1 tl oregano", "Verse rozemarijn", "Zout en peper"],
+          description: "Lichte, eiwitrijke maaltijd voor energie en spieropbouw.",
+          prepTime: "30 min",
+          servings: 4,
+          steps: [
+            "Meng olijfolie, citroensap, gehakte knoflook en kruiden",
+            "Marineer de kipfilets minimaal 30 minuten",
+            "Verwarm een grillpan of bbq",
+            "Grill de kip 6-7 minuten per kant",
+            "Laat 5 minuten rusten voor het snijden",
+            "Serveer met schijfjes citroen en verse kruiden"
+          ],
+          tip: "Kip is een magere eiwitbron die helpt bij het opbouwen van oestrogeen."
+        },
+        {
+          name: "Groene detox salade",
+          emoji: "🥬",
+          ingredients: ["100g gemengde sla", "1 avocado", "100g edamame", "1 komkommer", "50g pompoenpitten", "2 el appelazijn", "3 el olijfolie", "1 tl mosterd"],
+          description: "Reinigende salade die je lever ondersteunt.",
+          prepTime: "15 min",
+          servings: 2,
+          steps: [
+            "Was en droog de sla",
+            "Snijd de avocado en komkommer",
+            "Kook de edamame en laat afkoelen",
+            "Rooster de pompoenpitten licht in een pan",
+            "Maak dressing van azijn, olijfolie en mosterd",
+            "Meng alle ingrediënten in een kom",
+            "Besprenkel met dressing en serveer"
+          ],
+          tip: "De lever is extra actief in deze fase - ondersteun hem met groene groenten."
+        },
       ],
     },
     {
@@ -223,6 +332,61 @@ function getAllPhaseRecipes(cycleLength: number): Phase[] {
             "Garneer met granaatappelpitjes en peterselie"
           ],
           tip: "Kruisbloemige groenten bevatten stoffen die helpen oestrogeen te balanceren."
+        },
+        {
+          name: "Gazpacho",
+          emoji: "🍅",
+          ingredients: ["6 rijpe tomaten", "1 komkommer", "1 rode paprika", "2 teentjes knoflook", "3 el olijfolie", "2 el rode wijnazijn", "Zeezout", "Basilicum"],
+          description: "Verfrissende koude soep vol antioxidanten en lycopeen.",
+          prepTime: "15 min + koelen",
+          servings: 4,
+          steps: [
+            "Snijd de tomaten, komkommer en paprika grof",
+            "Doe alles in een blender met knoflook",
+            "Voeg olijfolie en azijn toe",
+            "Blend tot een gladde soep",
+            "Breng op smaak met zout",
+            "Zet minimaal 2 uur in de koelkast",
+            "Serveer koud met een scheut olijfolie en basilicum"
+          ],
+          tip: "Lycopeen uit tomaten is een krachtige antioxidant die beter opneembaar is met olijfolie."
+        },
+        {
+          name: "Zeebaars met venkel",
+          emoji: "🐟",
+          ingredients: ["2 zeebaarsfilets", "2 venkelknollen", "1 citroen", "3 el olijfolie", "2 teentjes knoflook", "Verse dille", "Witte wijn", "Zout en peper"],
+          description: "Lichte visschotel rijk aan omega-3 en antioxidanten.",
+          prepTime: "30 min",
+          servings: 2,
+          steps: [
+            "Verwarm de oven voor op 180°C",
+            "Snijd de venkel in dunne plakken",
+            "Leg de venkel in een ovenschaal met olijfolie en knoflook",
+            "Rooster 15 minuten tot zacht",
+            "Leg de vis erop, besprenkel met wijn en citroensap",
+            "Bak nog 12-15 minuten tot de vis gaar is",
+            "Garneer met dille en serveer"
+          ],
+          tip: "Venkel ondersteunt de spijsvertering en bevat fyto-oestrogenen."
+        },
+        {
+          name: "Spruitjes met granaatappel",
+          emoji: "🥬",
+          ingredients: ["400g spruitjes", "100g granaatappelpitjes", "50g pecannoten", "2 el balsamico", "3 el olijfolie", "1 el honing", "Zout en peper"],
+          description: "Kruisbloemige groente met zoete en zure smaken.",
+          prepTime: "25 min",
+          servings: 4,
+          steps: [
+            "Verwarm de oven voor op 200°C",
+            "Halveer de spruitjes",
+            "Meng met olijfolie, zout en peper",
+            "Rooster 20-25 minuten tot goudbruin",
+            "Rooster de pecannoten de laatste 5 minuten mee",
+            "Meng balsamico met honing voor dressing",
+            "Schep de spruitjes in een schaal",
+            "Strooi granaatappel en noten erover, druppel dressing"
+          ],
+          tip: "Spruitjes zijn kampioen in het ondersteunen van een gezonde oestrogeenbalans."
         },
       ],
     },
@@ -292,6 +456,63 @@ function getAllPhaseRecipes(cycleLength: number): Phase[] {
           ],
           tip: "Bruine rijst geeft langdurig energie door de langzame koolhydraten."
         },
+        {
+          name: "Pompoensoep met gember",
+          emoji: "🎃",
+          ingredients: ["800g pompoen", "1 ui", "2 teentjes knoflook", "3cm gember", "500ml groentebouillon", "100ml kokosmelk", "1 tl kurkuma", "Pompoenpitten", "Zout en peper"],
+          description: "Verwarmende soep die bloedsuiker stabiliseert.",
+          prepTime: "40 min",
+          servings: 4,
+          steps: [
+            "Schil de pompoen en snijd in blokjes",
+            "Fruit ui en knoflook in een grote pan",
+            "Voeg geraspte gember en kurkuma toe",
+            "Doe de pompoen erbij en roer goed",
+            "Voeg bouillon toe en breng aan de kook",
+            "Laat 25 minuten koken tot pompoen zacht is",
+            "Blend glad en roer kokosmelk erdoor",
+            "Serveer met pompoenpitten en een druppel olijfolie"
+          ],
+          tip: "Pompoen is rijk aan bètacaroteen en stabiliseert je bloedsuiker."
+        },
+        {
+          name: "Linzen dahl",
+          emoji: "🍛",
+          ingredients: ["250g rode linzen", "400ml kokosmelk", "1 ui", "3 teentjes knoflook", "2cm gember", "2 tl garam masala", "1 tl kurkuma", "400g tomatenblokjes", "Koriander"],
+          description: "Romige Indiase linzencurry vol eiwitten en vezels.",
+          prepTime: "30 min",
+          servings: 4,
+          steps: [
+            "Spoel de linzen af onder koud water",
+            "Fruit de ui tot glazig",
+            "Voeg knoflook, gember en specerijen toe",
+            "Bak 1 minuut tot het geurt",
+            "Voeg tomaten, linzen en kokosmelk toe",
+            "Laat 20-25 minuten zachtjes koken",
+            "Roer regelmatig en voeg water toe indien nodig",
+            "Garneer met verse koriander"
+          ],
+          tip: "Linzen zijn een uitstekende bron van B-vitamines die je stemming ondersteunen."
+        },
+        {
+          name: "Bananen pannenkoeken",
+          emoji: "🥞",
+          ingredients: ["2 rijpe bananen", "2 eieren", "50g havermout", "1/2 tl kaneel", "Snuf zout", "Kokosolie", "Bessen en honing voor topping"],
+          description: "Gezonde pannenkoeken zonder toegevoegde suiker.",
+          prepTime: "15 min",
+          servings: 2,
+          steps: [
+            "Prak de bananen fijn in een kom",
+            "Klop de eieren erdoor",
+            "Meng havermout, kaneel en zout erdoor",
+            "Laat 5 minuten rusten",
+            "Verhit kokosolie in een pan",
+            "Schep kleine hoopjes beslag in de pan",
+            "Bak 2-3 minuten per kant tot goudbruin",
+            "Serveer met verse bessen en honing"
+          ],
+          tip: "Bananen zijn rijk aan vitamine B6 die helpt bij de aanmaak van serotonine."
+        },
       ],
     },
     {
@@ -357,6 +578,82 @@ function getAllPhaseRecipes(cycleLength: number): Phase[] {
             "Bewaar in de koelkast, blijft 2 weken goed"
           ],
           tip: "Deze gezonde snack stilt je chocolade craving zonder de suikerdip!"
+        },
+        {
+          name: "Makreel salade",
+          emoji: "🐟",
+          ingredients: ["2 gerookte makreelfilets", "200g gemengde sla", "1 rode ui", "1 appel", "50g walnoten", "2 el mierikswortel", "3 el crème fraîche", "Citroensap"],
+          description: "Omega-3 rijke salade die helpt tegen PMS-klachten.",
+          prepTime: "15 min",
+          servings: 2,
+          steps: [
+            "Prak de makreel in grove stukken",
+            "Snijd de ui in dunne ringen",
+            "Snijd de appel in dunne partjes",
+            "Meng crème fraîche met mierikswortel en citroensap",
+            "Verdeel de sla over borden",
+            "Schik makreel, ui en appel erop",
+            "Strooi walnoten erover",
+            "Druppel de dressing erover"
+          ],
+          tip: "Makreel bevat nog meer omega-3 dan zalm en is goedkoper!"
+        },
+        {
+          name: "Avocado chocolademousse",
+          emoji: "🥑",
+          ingredients: ["2 rijpe avocado's", "4 el cacao poeder", "4 el maple syrup", "1 tl vanille extract", "Snufje zeezout", "100ml amandelmelk", "Bessen voor topping"],
+          description: "Romige, gezonde chocolademousse zonder schuldgevoel.",
+          prepTime: "10 min",
+          servings: 4,
+          steps: [
+            "Halveer de avocado's en verwijder de pit",
+            "Schep het vruchtvlees in een blender",
+            "Voeg cacao, maple syrup, vanille en zout toe",
+            "Blend tot een gladde mousse",
+            "Voeg amandelmelk toe voor gewenste dikte",
+            "Verdeel over kommetjes",
+            "Zet 30 minuten in de koelkast",
+            "Serveer met verse bessen"
+          ],
+          tip: "Avocado maakt deze mousse romig én zit vol gezonde vetten."
+        },
+        {
+          name: "Kamillethee latte",
+          emoji: "🍵",
+          ingredients: ["2 zakjes kamillethee", "200ml havermelk", "1 tl honing", "1/2 tl kaneel", "Snufje nootmuskaat"],
+          description: "Kalmerende drank voor ontspanning en beter slapen.",
+          prepTime: "5 min",
+          servings: 1,
+          steps: [
+            "Zet de kamillethee in 150ml heet water",
+            "Laat 5 minuten trekken",
+            "Verwarm de havermelk",
+            "Schuim de melk op met een garde of melkopschuimer",
+            "Verwijder de theezakjes",
+            "Giet de opgeklopte melk erbij",
+            "Roer honing, kaneel en nootmuskaat erdoor",
+            "Drink voor het slapen"
+          ],
+          tip: "Kamille helpt bij ontspanning en kan krampen verlichten."
+        },
+        {
+          name: "Walnoot-dadel hapjes",
+          emoji: "🥜",
+          ingredients: ["12 medjool dadels", "12 walnoten", "50g pure chocolade (70%)", "Zeezout"],
+          description: "Simpele zoete snack met gezonde vetten en magnesium.",
+          prepTime: "15 min",
+          servings: 12,
+          steps: [
+            "Snijd de dadels open en verwijder de pit",
+            "Druk een walnoot in elke dadel",
+            "Smelt de chocolade au bain-marie",
+            "Dip de dadels half in de chocolade",
+            "Leg op bakpapier",
+            "Bestrooi met een snufje zeezout",
+            "Laat opstijven in de koelkast",
+            "Bewaar in de koelkast"
+          ],
+          tip: "Walnoten bevatten omega-3 en magnesium - perfect tegen PMS!"
         },
       ],
     },
