@@ -24,6 +24,13 @@ const nutritionConfig: Record<string, { emoji: string; label: string; color: str
   cravings: { emoji: "🍫", label: "Cravings", color: "bg-purple-100 text-purple-800" },
 };
 
+interface Recipe {
+  name: string;
+  emoji: string;
+  ingredients: string[];
+  description: string;
+}
+
 interface NutritionPhase {
   name: string;
   emoji: string;
@@ -34,6 +41,7 @@ interface NutritionPhase {
   recommended: string[];
   avoid: string[];
   tips: string[];
+  recipes: Recipe[];
 }
 
 function getNutritionPhase(cycleDay: number, cycleLength: number): NutritionPhase {
@@ -67,6 +75,26 @@ function getNutritionPhase(cycleDay: number, cycleLength: number): NutritionPhas
         "Warme soepen en stoofpotten zijn ideaal",
         "Magnesiumrijk voedsel helpt tegen krampen",
       ],
+      recipes: [
+        {
+          name: "Spinazie-linzensoep",
+          emoji: "🥣",
+          ingredients: ["Rode linzen", "Spinazie", "Tomaten", "Gember", "Knoflook", "Komijn"],
+          description: "Verwarmende soep vol ijzer. Voeg citroensap toe voor vitamine C.",
+        },
+        {
+          name: "Zalm met bietensalade",
+          emoji: "🐟",
+          ingredients: ["Zalmfilet", "Rode biet", "Rucola", "Walnoten", "Geitenkaas"],
+          description: "Omega-3 en ijzer in één gerecht. Perfect voor herstel.",
+        },
+        {
+          name: "Chocolade-bananensmothie",
+          emoji: "🍫",
+          ingredients: ["Banaan", "Cacao", "Spinazie", "Amandelmelk", "Dadels"],
+          description: "Zoet maar gezond. Magnesium helpt tegen krampen.",
+        },
+      ],
     };
   }
 
@@ -95,6 +123,26 @@ function getNutritionPhase(cycleDay: number, cycleLength: number): NutritionPhas
         "Probiotische voeding ondersteunt oestrogeenbalans",
         "Gefermenteerde groenten zijn nu extra goed",
         "Lichte, kleurrijke maaltijden passen bij je energie",
+      ],
+      recipes: [
+        {
+          name: "Poké bowl met kip",
+          emoji: "🥗",
+          ingredients: ["Kipfilet", "Sushi rijst", "Avocado", "Edamame", "Komkommer", "Sesamzaad"],
+          description: "Lichte, eiwitrijke bowl vol energie voor actieve dagen.",
+        },
+        {
+          name: "Shakshuka",
+          emoji: "🥚",
+          ingredients: ["Eieren", "Tomaten", "Paprika", "Ui", "Komijn", "Feta"],
+          description: "Mediterraans ontbijt vol eiwitten en groenten.",
+        },
+        {
+          name: "Bessen-yoghurt parfait",
+          emoji: "🫐",
+          ingredients: ["Griekse yoghurt", "Gemengde bessen", "Granola", "Honing", "Chiazaad"],
+          description: "Probiotica en antioxidanten voor hormoonbalans.",
+        },
       ],
     };
   }
@@ -126,6 +174,26 @@ function getNutritionPhase(cycleDay: number, cycleLength: number): NutritionPhas
         "Drink extra water voor optimale hydratatie",
         "Rauwe groenten ondersteunen je energie",
       ],
+      recipes: [
+        {
+          name: "Rainbow salade",
+          emoji: "🥗",
+          ingredients: ["Broccoli", "Rode kool", "Wortel", "Paprika", "Quinoa", "Citroendressing"],
+          description: "Kleurrijke salade vol vezels en antioxidanten.",
+        },
+        {
+          name: "Groene smoothie bowl",
+          emoji: "🥬",
+          ingredients: ["Boerenkool", "Mango", "Banaan", "Kokoswater", "Chiazaad", "Kokos"],
+          description: "Detox smoothie die je lever ondersteunt.",
+        },
+        {
+          name: "Geroosterde bloemkoolsteak",
+          emoji: "🥦",
+          ingredients: ["Bloemkool", "Kurkuma", "Tahini", "Granaatappel", "Peterselie"],
+          description: "Kruisbloemige groente die oestrogeen balanceert.",
+        },
+      ],
     };
   }
 
@@ -156,6 +224,26 @@ function getNutritionPhase(cycleDay: number, cycleLength: number): NutritionPhas
         "B-vitamines ondersteunen je stemming",
         "Magnesium helpt tegen vroege PMS-klachten",
       ],
+      recipes: [
+        {
+          name: "Zoete aardappel curry",
+          emoji: "🍠",
+          ingredients: ["Zoete aardappel", "Kikkererwten", "Kokosmelk", "Spinazie", "Curry", "Gember"],
+          description: "Comfortfood met complexe koolhydraten en eiwitten.",
+        },
+        {
+          name: "Overnight oats",
+          emoji: "🥣",
+          ingredients: ["Havermout", "Amandelmelk", "Chiazaad", "Banaan", "Pindakaas", "Kaneel"],
+          description: "Makkelijk ontbijt dat bloedsuiker stabiel houdt.",
+        },
+        {
+          name: "Buddha bowl",
+          emoji: "🍚",
+          ingredients: ["Bruine rijst", "Hummus", "Geroosterde groenten", "Avocado", "Tahini"],
+          description: "Voedzame bowl met langzame koolhydraten.",
+        },
+      ],
     };
   }
 
@@ -185,6 +273,26 @@ function getNutritionPhase(cycleDay: number, cycleLength: number): NutritionPhas
       "Pure chocolade (met mate) is prima bij cravings",
       "Omega-3 helpt tegen stemmingswisselingen",
       "Vermijd zout om opgeblazen gevoel te beperken",
+    ],
+    recipes: [
+      {
+        name: "Gouden melk",
+        emoji: "🍵",
+        ingredients: ["Amandelmelk", "Kurkuma", "Gember", "Kaneel", "Honing", "Zwarte peper"],
+        description: "Ontstekingsremmende warme drank voor ontspanning.",
+      },
+      {
+        name: "Zalm met groenten",
+        emoji: "🐟",
+        ingredients: ["Zalmfilet", "Broccoli", "Asperges", "Citroen", "Dille", "Olijfolie"],
+        description: "Omega-3 rijke maaltijd die stemming ondersteunt.",
+      },
+      {
+        name: "Chocolade energy balls",
+        emoji: "🍫",
+        ingredients: ["Dadels", "Cacao", "Walnoten", "Havermout", "Kokos", "Zeezout"],
+        description: "Gezonde snack voor chocolade cravings.",
+      },
     ],
   };
 }

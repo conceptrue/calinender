@@ -7,6 +7,7 @@ import { DayDetail } from "@/components/DayDetail";
 import { SymptomsOverview } from "@/components/SymptomsOverview";
 import { NutritionFullView } from "@/components/NutritionFullView";
 import { ExerciseFullView } from "@/components/ExerciseFullView";
+import { RecipesView } from "@/components/RecipesView";
 import { Sidebar, type ViewType } from "@/components/Sidebar";
 import { useCycleData } from "@/hooks/useCycleData";
 import { getAllCalculations } from "@/lib/calculations";
@@ -204,6 +205,16 @@ export default function Home() {
             <ExerciseFullView
               symptoms={cycleData.symptoms}
               onDayClick={handleDayClick}
+              currentCycleDay={currentCycleDay}
+              cycleLength={averageCycleLength}
+            />
+          </div>
+        )}
+
+        {/* Recepten View */}
+        {activeView === "recepten" && (
+          <div className="max-w-6xl mx-auto">
+            <RecipesView
               currentCycleDay={currentCycleDay}
               cycleLength={averageCycleLength}
             />

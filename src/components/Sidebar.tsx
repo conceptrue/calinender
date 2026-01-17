@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Calendar, Apple, Activity, Menu, X } from "lucide-react";
+import { Calendar, Apple, Activity, Menu, X, ChefHat } from "lucide-react";
 
-export type ViewType = "kalender" | "voeding" | "beweging";
+export type ViewType = "kalender" | "voeding" | "beweging" | "recepten";
 
 interface SidebarProps {
   activeView: ViewType;
@@ -21,6 +21,7 @@ const navItems: NavItem[] = [
   { id: "kalender", label: "Kalender", icon: Calendar },
   { id: "voeding", label: "Voeding", icon: Apple },
   { id: "beweging", label: "Beweging", icon: Activity },
+  { id: "recepten", label: "Recepten", icon: ChefHat },
 ];
 
 export function Sidebar({ activeView, onViewChange }: SidebarProps) {
