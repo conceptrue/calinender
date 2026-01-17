@@ -226,7 +226,7 @@ export default function Home() {
 
         {/* Zwanger worden View */}
         {activeView === "zwanger" && (
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             <PregnancyView
               currentCycleDay={currentCycleDay}
               cycleLength={averageCycleLength}

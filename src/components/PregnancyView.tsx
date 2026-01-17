@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FertilityCalendar } from "@/components/FertilityCalendar";
+import { FertilityOverview } from "@/components/FertilityOverview";
 import { FertilityDayDetail } from "@/components/FertilityDayDetail";
 import {
   Baby,
@@ -293,29 +294,42 @@ export function PregnancyView({
         </CardContent>
       </Card>
 
-      {/* Fertility Tracking Calendar */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-pink-500" />
-            Vruchtbaarheid bijhouden
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground mb-4">
-            Klik op een dag om temperatuur, cervixslijm, ovulatietests en andere gegevens bij te houden.
-          </p>
-          <FertilityCalendar
-            fertility={fertility}
-            periods={periods}
-            fertileStart={fertileStart}
-            fertileEnd={fertileEnd}
-            ovulationDay={ovulationDay}
-            currentCycleDay={currentCycleDay}
-            onDayClick={handleDayClick}
-          />
-        </CardContent>
-      </Card>
+      {/* Fertility Tracking - Calendar + Overview side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-6">
+        {/* Calendar */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-pink-500" />
+              Vruchtbaarheid bijhouden
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FertilityCalendar
+              fertility={fertility}
+              periods={periods}
+              fertileStart={fertileStart}
+              fertileEnd={fertileEnd}
+              ovulationDay={ovulationDay}
+              currentCycleDay={currentCycleDay}
+              onDayClick={handleDayClick}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Overview */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Overzicht</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FertilityOverview
+              fertility={fertility}
+              onDayClick={handleDayClick}
+            />
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Fertility Tips */}
       <Card>
