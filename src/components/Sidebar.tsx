@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { APP_VERSION } from "@/lib/version";
 import { Calendar, Apple, Activity, Menu, X, ChefHat } from "lucide-react";
 
 export type ViewType = "kalender" | "voeding" | "beweging" | "recepten";
@@ -128,6 +129,9 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
         <div className="p-4 border-t border-sidebar-border">
           <p className="text-xs text-muted-foreground">
             Alle data blijft lokaal
+          </p>
+          <p className="text-xs text-muted-foreground/60 mt-1">
+            v{APP_VERSION}
           </p>
         </div>
       </aside>
