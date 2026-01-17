@@ -5,11 +5,12 @@ import { CalendarGridVariants } from "@/components/CalendarGridVariants";
 import { Legend } from "@/components/Legend";
 import { DayDetail } from "@/components/DayDetail";
 import { SymptomsOverview } from "@/components/SymptomsOverview";
-import { NutritionOverview } from "@/components/NutritionOverview";
-import { ExerciseOverview } from "@/components/ExerciseOverview";
+import { NutritionFullView } from "@/components/NutritionFullView";
+import { ExerciseFullView } from "@/components/ExerciseFullView";
+import { Sidebar, type ViewType } from "@/components/Sidebar";
 import { useCycleData } from "@/hooks/useCycleData";
 import { getAllCalculations } from "@/lib/calculations";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Home() {
   const {
@@ -21,6 +22,7 @@ export default function Home() {
   } = useCycleData();
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [activeView, setActiveView] = useState<ViewType>("kalender");
 
   const calculations = useMemo(() => {
     return getAllCalculations(cycleData.periods, cycleData.settings);
@@ -66,15 +68,9 @@ export default function Home() {
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-background">
-        <header className="border-b">
-          <div className="container mx-auto px-4 py-4">
-            <h1 className="text-2xl font-semibold text-foreground">
-              Menstruatiekalender
-            </h1>
-          </div>
-        </header>
-        <main className="container mx-auto px-4 py-6">
+      <div className="flex min-h-screen bg-background">
+        <Sidebar activeView={activeView} onViewChange={setActiveView} />
+        <main className="flex-1 p-6 md:ml-16">
           <p className="text-muted-foreground">Laden...</p>
         </main>
       </div>
@@ -97,112 +93,122 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-semibold text-foreground">
-            Menstruatiekalender
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Privé - alle data blijft lokaal op je apparaat
-          </p>
-        </div>
-      </header>
+    <div className="flex min-h-screen bg-background">
+      <Sidebar activeView={activeView} onViewChange={setActiveView} />
 
-      <main className="container mx-auto px-4 py-6 max-w-lg">
-        {/* Cycle Day Display */}
-        <Card className="mb-6">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex flex-col items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-rose-100 to-rose-200 border-4 border-rose-300">
-                  <span className="text-3xl font-bold text-rose-700">
-                    {currentCycleDay ?? "—"}
-                  </span>
-                </div>
-                <div>
-                  <p className="text-lg font-medium">
-                    {currentCycleDay ? `Dag ${currentCycleDay}` : "Geen data"}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    van je cyclus
-                  </p>
-                </div>
-              </div>
-
-              {daysUntilNextPeriod !== null && (
-                <div className="text-right">
-                  <p className="text-2xl font-semibold text-foreground">
-                    {daysUntilNextPeriod <= 0 ? "Nu" : daysUntilNextPeriod}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {daysUntilNextPeriod <= 0 ? "Periode verwacht" : "dagen tot periode"}
-                  </p>
-                </div>
-              )}
+      <main className="flex-1 p-4 md:p-6 pt-16 md:pt-6 md:ml-16">
+        {/* Kalender View */}
+        {activeView === "kalender" && (
+          <div className="max-w-6xl mx-auto">
+            {/* Page Header */}
+            <div className="mb-6">
+              <h1 className="text-2xl font-semibold">Kalender</h1>
+              <p className="text-muted-foreground">
+                Privé - alle data blijft lokaal op je apparaat
+              </p>
             </div>
 
-            <div className="flex justify-around mt-6 pt-4 border-t">
-              <div className="text-center">
-                <p className="text-xl font-semibold">{averageCycleLength}</p>
-                <p className="text-xs text-muted-foreground">Cycluslengte</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xl font-semibold">{averagePeriodLength}</p>
-                <p className="text-xs text-muted-foreground">Periodelengte</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xl font-semibold">{cycleData.periods.length}</p>
-                <p className="text-xs text-muted-foreground">Periodes</p>
-              </div>
+            {/* Cycle Day Card - Full Width */}
+            <Card className="mb-6">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="flex flex-col items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-rose-100 to-rose-200 border-4 border-rose-300">
+                      <span className="text-3xl font-bold text-rose-700">
+                        {currentCycleDay ?? "—"}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-lg font-medium">
+                        {currentCycleDay ? `Dag ${currentCycleDay}` : "Geen data"}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        van je cyclus
+                      </p>
+                    </div>
+                  </div>
+
+                  {daysUntilNextPeriod !== null && (
+                    <div className="text-right">
+                      <p className="text-2xl font-semibold text-foreground">
+                        {daysUntilNextPeriod <= 0 ? "Nu" : daysUntilNextPeriod}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {daysUntilNextPeriod <= 0 ? "Periode verwacht" : "dagen tot periode"}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-around mt-6 pt-4 border-t">
+                  <div className="text-center">
+                    <p className="text-xl font-semibold">{averageCycleLength}</p>
+                    <p className="text-xs text-muted-foreground">Cycluslengte</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xl font-semibold">{averagePeriodLength}</p>
+                    <p className="text-xs text-muted-foreground">Periodelengte</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xl font-semibold">{cycleData.periods.length}</p>
+                    <p className="text-xs text-muted-foreground">Periodes</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Calendar + Symptoms side by side */}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-6">
+              {/* Calendar */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Kalender</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CalendarGridVariants {...calendarProps} variant="classic" />
+                  <Legend />
+                </CardContent>
+              </Card>
+
+              {/* Symptoms Overview Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Symptomen</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <SymptomsOverview
+                    symptoms={cycleData.symptoms}
+                    onDayClick={handleDayClick}
+                  />
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        )}
 
-        {/* Calendar */}
-        <Card>
-          <CardContent className="pt-6">
-            <CalendarGridVariants {...calendarProps} variant="classic" />
-            <Legend />
-          </CardContent>
-        </Card>
-
-        {/* Symptoms Overview with Tabs */}
-        <Card className="mt-6">
-          <CardContent className="pt-6">
-            <h3 className="text-lg font-semibold mb-4">Symptomen</h3>
-            <SymptomsOverview
-              symptoms={cycleData.symptoms}
-              onDayClick={handleDayClick}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Nutrition Overview */}
-        <Card className="mt-6">
-          <CardContent className="pt-6">
-            <h3 className="text-lg font-semibold mb-4">Voeding</h3>
-            <NutritionOverview
+        {/* Voeding View */}
+        {activeView === "voeding" && (
+          <div className="max-w-4xl mx-auto">
+            <NutritionFullView
               symptoms={cycleData.symptoms}
               onDayClick={handleDayClick}
               currentCycleDay={currentCycleDay}
               cycleLength={averageCycleLength}
             />
-          </CardContent>
-        </Card>
+          </div>
+        )}
 
-        {/* Exercise Overview */}
-        <Card className="mt-6">
-          <CardContent className="pt-6">
-            <h3 className="text-lg font-semibold mb-4">Beweging</h3>
-            <ExerciseOverview
+        {/* Beweging View */}
+        {activeView === "beweging" && (
+          <div className="max-w-4xl mx-auto">
+            <ExerciseFullView
               symptoms={cycleData.symptoms}
               onDayClick={handleDayClick}
               currentCycleDay={currentCycleDay}
               cycleLength={averageCycleLength}
             />
-          </CardContent>
-        </Card>
+          </div>
+        )}
       </main>
 
       {/* Day Detail Dialog */}

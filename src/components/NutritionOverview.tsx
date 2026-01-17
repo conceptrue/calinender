@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { DaySymptom } from "@/types";
 
-type ViewType = "plan" | "recent" | "calendar";
+type ViewType = "plan" | "fases" | "recent" | "calendar";
 
 interface NutritionOverviewProps {
   symptoms: DaySymptom[];
@@ -217,6 +217,18 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
     return getNutritionPhase(currentCycleDay, cycleLength);
   }, [currentCycleDay, cycleLength]);
 
+  const allPhases = useMemo(() => {
+    // Bereken representatieve dagen voor elke fase
+    const ovulationDay = Math.round(cycleLength / 2);
+    return [
+      { day: 3, phase: getNutritionPhase(3, cycleLength) },
+      { day: ovulationDay - 4, phase: getNutritionPhase(ovulationDay - 4, cycleLength) },
+      { day: ovulationDay, phase: getNutritionPhase(ovulationDay, cycleLength) },
+      { day: ovulationDay + 4, phase: getNutritionPhase(ovulationDay + 4, cycleLength) },
+      { day: cycleLength - 3, phase: getNutritionPhase(cycleLength - 3, cycleLength) },
+    ];
+  }, [cycleLength]);
+
   const renderPlanView = () => {
     if (!currentCycleDay || !currentPhase) {
       return (
@@ -309,6 +321,89 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
             })}
           </div>
         </div>
+      </div>
+    );
+  };
+
+  const renderFasesView = () => {
+    return (
+      <div className="space-y-4">
+        {allPhases.map(({ phase }, index) => {
+          const isCurrentPhase = currentPhase?.name === phase.name;
+
+          return (
+            <div
+              key={phase.name}
+              className={cn(
+                "rounded-lg border overflow-hidden",
+                isCurrentPhase && "ring-2 ring-primary"
+              )}
+            >
+              {/* Phase Header */}
+              <div className={`p-4 ${phase.bgColor}`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{phase.emoji}</span>
+                    <div>
+                      <h4 className={`font-semibold ${phase.color}`}>
+                        {phase.name}
+                        {isCurrentPhase && (
+                          <span className="ml-2 text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+                            Nu
+                          </span>
+                        )}
+                      </h4>
+                      <p className="text-xs text-muted-foreground">Focus: {phase.focus}</p>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-sm mt-2 text-muted-foreground">{phase.description}</p>
+              </div>
+
+              {/* Phase Content */}
+              <div className="p-4 space-y-3">
+                {/* Recommended */}
+                <div>
+                  <h5 className="text-sm font-medium text-green-700 mb-2">✓ Aanbevolen</h5>
+                  <div className="flex flex-wrap gap-1.5">
+                    {phase.recommended.map((item) => (
+                      <span key={item} className="px-2 py-0.5 bg-green-50 text-green-700 rounded-full text-xs">
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Avoid */}
+                {phase.avoid.length > 0 && (
+                  <div>
+                    <h5 className="text-sm font-medium text-red-700 mb-2">✗ Vermijd</h5>
+                    <div className="flex flex-wrap gap-1.5">
+                      {phase.avoid.map((item) => (
+                        <span key={item} className="px-2 py-0.5 bg-red-50 text-red-700 rounded-full text-xs">
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Tips */}
+                <div>
+                  <h5 className="text-sm font-medium text-blue-700 mb-2">💡 Tips</h5>
+                  <ul className="space-y-1">
+                    {phase.tips.map((tip, tipIndex) => (
+                      <li key={tipIndex} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                        <span className="text-blue-500">•</span>
+                        {tip}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -418,7 +513,7 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
   return (
     <div>
       {/* Tabs */}
-      <div className="grid grid-cols-3 gap-1 p-1 mb-4 bg-muted rounded-lg">
+      <div className="grid grid-cols-4 gap-1 p-1 mb-4 bg-muted rounded-lg">
         <button
           onClick={() => setActiveTab("plan")}
           className={cn(
@@ -429,6 +524,17 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
           )}
         >
           Plan
+        </button>
+        <button
+          onClick={() => setActiveTab("fases")}
+          className={cn(
+            "py-2 text-sm font-medium rounded-md transition-colors text-center",
+            activeTab === "fases"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          Fases
         </button>
         <button
           onClick={() => setActiveTab("recent")}
@@ -457,6 +563,7 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
       {/* Content */}
       <div className="border rounded-lg p-4">
         {activeTab === "plan" && renderPlanView()}
+        {activeTab === "fases" && renderFasesView()}
         {activeTab === "recent" && renderRecentView()}
         {activeTab === "calendar" && renderCalendarView()}
       </div>
