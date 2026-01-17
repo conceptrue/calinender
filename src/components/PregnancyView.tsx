@@ -1,7 +1,10 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { FertilityCalendar } from "@/components/FertilityCalendar";
+import { FertilityDayDetail } from "@/components/FertilityDayDetail";
 import {
   Baby,
   Calendar,
@@ -13,16 +16,30 @@ import {
   Pill,
   ThermometerSun,
   Clock,
-  Salad,
   Fish,
   Egg,
   Leaf,
   AlertCircle,
 } from "lucide-react";
+import type { FertilityDay, Period, CervicalMucus, OvulationTest } from "@/types";
 
 interface PregnancyViewProps {
   currentCycleDay: number | null;
   cycleLength: number;
+  fertility: FertilityDay[];
+  periods: Period[];
+  getFertilityForDate: (dateString: string) => FertilityDay | null;
+  updateFertility: (
+    dateString: string,
+    updates: {
+      temperature?: number | null;
+      cervicalMucus?: CervicalMucus;
+      ovulationTest?: OvulationTest;
+      intercourse?: boolean;
+      supplements?: boolean;
+      notes?: string;
+    }
+  ) => void;
 }
 
 interface FertilityTip {
@@ -166,7 +183,16 @@ const avoidList = [
   "Stress - kan de menstruatiecyclus beïnvloeden",
 ];
 
-export function PregnancyView({ currentCycleDay, cycleLength }: PregnancyViewProps) {
+export function PregnancyView({
+  currentCycleDay,
+  cycleLength,
+  fertility,
+  periods,
+  getFertilityForDate,
+  updateFertility,
+}: PregnancyViewProps) {
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
   const getFertileWindow = () => {
     const ovulationDay = Math.round(cycleLength - 14);
     const fertileStart = ovulationDay - 5;
@@ -182,6 +208,25 @@ export function PregnancyView({ currentCycleDay, cycleLength }: PregnancyViewPro
     currentCycleDay <= fertileEnd;
 
   const isOvulationDay = currentCycleDay === ovulationDay;
+
+  const handleDayClick = useCallback((dateString: string) => {
+    setSelectedDate(dateString);
+  }, []);
+
+  const handleCloseDetail = useCallback(() => {
+    setSelectedDate(null);
+  }, []);
+
+  const handleUpdateFertility = useCallback(
+    (updates: Parameters<typeof updateFertility>[1]) => {
+      if (selectedDate) {
+        updateFertility(selectedDate, updates);
+      }
+    },
+    [selectedDate, updateFertility]
+  );
+
+  const selectedFertilityData = selectedDate ? getFertilityForDate(selectedDate) : null;
 
   return (
     <div className="space-y-6">
@@ -245,6 +290,30 @@ export function PregnancyView({ currentCycleDay, cycleLength }: PregnancyViewPro
               )}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Fertility Tracking Calendar */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-pink-500" />
+            Vruchtbaarheid bijhouden
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground mb-4">
+            Klik op een dag om temperatuur, cervixslijm, ovulatietests en andere gegevens bij te houden.
+          </p>
+          <FertilityCalendar
+            fertility={fertility}
+            periods={periods}
+            fertileStart={fertileStart}
+            fertileEnd={fertileEnd}
+            ovulationDay={ovulationDay}
+            currentCycleDay={currentCycleDay}
+            onDayClick={handleDayClick}
+          />
         </CardContent>
       </Card>
 
@@ -421,6 +490,14 @@ export function PregnancyView({ currentCycleDay, cycleLength }: PregnancyViewPro
           </p>
         </CardContent>
       </Card>
+
+      {/* Fertility Day Detail Dialog */}
+      <FertilityDayDetail
+        dateString={selectedDate}
+        fertilityData={selectedFertilityData}
+        onClose={handleCloseDetail}
+        onUpdate={handleUpdateFertility}
+      />
     </div>
   );
 }

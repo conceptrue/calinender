@@ -7,12 +7,15 @@ import type {
   CycleData,
   Period,
   DaySymptom,
+  FertilityDay,
   UserSettings,
   Mood,
   PainLevel,
   EnergyLevel,
   NutritionLevel,
   ExerciseType,
+  CervicalMucus,
+  OvulationTest,
 } from "@/types";
 import { DEFAULT_CYCLE_DATA } from "@/types";
 
@@ -211,6 +214,62 @@ export function useCycleData() {
     [setCycleData]
   );
 
+  // Get fertility data for a date
+  const getFertilityForDate = useCallback(
+    (dateString: string): FertilityDay | null => {
+      return cycleData.fertility?.find((f) => f.date === dateString) || null;
+    },
+    [cycleData.fertility]
+  );
+
+  // Update fertility data for a date
+  const updateFertility = useCallback(
+    (
+      dateString: string,
+      updates: {
+        temperature?: number | null;
+        cervicalMucus?: CervicalMucus;
+        ovulationTest?: OvulationTest;
+        intercourse?: boolean;
+        supplements?: boolean;
+        notes?: string;
+      }
+    ) => {
+      setCycleData((prev) => {
+        const fertility = prev.fertility || [];
+        const existingIndex = fertility.findIndex((f) => f.date === dateString);
+
+        if (existingIndex !== -1) {
+          // Update existing
+          return {
+            ...prev,
+            fertility: fertility.map((f, i) =>
+              i === existingIndex ? { ...f, ...updates } : f
+            ),
+          };
+        } else {
+          // Create new
+          return {
+            ...prev,
+            fertility: [
+              ...fertility,
+              {
+                date: dateString,
+                temperature: updates.temperature ?? null,
+                cervicalMucus: updates.cervicalMucus ?? null,
+                ovulationTest: updates.ovulationTest ?? null,
+                intercourse: updates.intercourse ?? false,
+                supplements: updates.supplements ?? false,
+                notes: updates.notes ?? "",
+              },
+            ],
+          };
+        }
+      });
+    },
+    [setCycleData]
+  );
+
   // Update settings
   const updateSettings = useCallback(
     (updates: Partial<UserSettings>) => {
@@ -235,6 +294,8 @@ export function useCycleData() {
     togglePeriodDay,
     getSymptomForDate,
     updateSymptom,
+    getFertilityForDate,
+    updateFertility,
     updateSettings,
     getSortedPeriods,
   };

@@ -10,6 +10,20 @@ export type EnergyLevel = 1 | 2 | 3 | 4 | 5 | null;
 export type NutritionLevel = "healthy" | "balanced" | "unhealthy" | "cravings" | null;
 export type ExerciseType = "walking" | "running" | "cycling" | "swimming" | "gym" | "yoga" | "sports" | "other" | null;
 
+// Fertility tracking types
+export type CervicalMucus = "dry" | "sticky" | "creamy" | "watery" | "eggwhite" | null;
+export type OvulationTest = "negative" | "positive" | null;
+
+export interface FertilityDay {
+  date: string; // "YYYY-MM-DD"
+  temperature: number | null; // Basal body temperature in Celsius
+  cervicalMucus: CervicalMucus;
+  ovulationTest: OvulationTest;
+  intercourse: boolean;
+  supplements: boolean; // Took fertility supplements
+  notes: string;
+}
+
 export interface DaySymptom {
   date: string; // "YYYY-MM-DD"
   mood: Mood;
@@ -29,6 +43,7 @@ export interface UserSettings {
 export interface CycleData {
   periods: Period[];
   symptoms: DaySymptom[];
+  fertility: FertilityDay[];
   settings: UserSettings;
 }
 
@@ -40,5 +55,6 @@ export const DEFAULT_SETTINGS: UserSettings = {
 export const DEFAULT_CYCLE_DATA: CycleData = {
   periods: [],
   symptoms: [],
+  fertility: [],
   settings: DEFAULT_SETTINGS,
 };

@@ -21,6 +21,8 @@ export default function Home() {
     togglePeriodDay,
     getSymptomForDate,
     updateSymptom,
+    getFertilityForDate,
+    updateFertility,
   } = useCycleData();
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -228,6 +230,10 @@ export default function Home() {
             <PregnancyView
               currentCycleDay={currentCycleDay}
               cycleLength={averageCycleLength}
+              fertility={cycleData.fertility || []}
+              periods={cycleData.periods}
+              getFertilityForDate={getFertilityForDate}
+              updateFertility={updateFertility}
             />
           </div>
         )}
