@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, ThermometerSun, Droplets, Heart, Pill, FlaskConical } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { FertilityDay, Period } from "@/types";
 
 interface FertilityCalendarProps {
@@ -17,8 +18,8 @@ interface FertilityCalendarProps {
 
 const DAYS_NL = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
 const MONTHS_NL = [
-  "Januari", "Februari", "Maart", "April", "Mei", "Juni",
-  "Juli", "Augustus", "September", "Oktober", "November", "December"
+  "januari", "februari", "maart", "april", "mei", "juni",
+  "juli", "augustus", "september", "oktober", "november", "december"
 ];
 
 export function FertilityCalendar({
@@ -27,7 +28,6 @@ export function FertilityCalendar({
   fertileStart,
   fertileEnd,
   ovulationDay,
-  currentCycleDay,
   onDayClick,
 }: FertilityCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -44,16 +44,32 @@ export function FertilityCalendar({
     if (startDay < 0) startDay = 6;
 
     const daysInMonth = lastDayOfMonth.getDate();
-    const days: (Date | null)[] = [];
+    const days: { date: Date | null; isCurrentMonth: boolean }[] = [];
 
-    // Add empty cells for days before the first of the month
-    for (let i = 0; i < startDay; i++) {
-      days.push(null);
+    // Add days from previous month
+    const prevMonth = new Date(year, month, 0);
+    for (let i = startDay - 1; i >= 0; i--) {
+      days.push({
+        date: new Date(year, month - 1, prevMonth.getDate() - i),
+        isCurrentMonth: false,
+      });
     }
 
     // Add all days of the month
     for (let i = 1; i <= daysInMonth; i++) {
-      days.push(new Date(year, month, i));
+      days.push({
+        date: new Date(year, month, i),
+        isCurrentMonth: true,
+      });
+    }
+
+    // Add days from next month to complete the grid
+    const remaining = 42 - days.length;
+    for (let i = 1; i <= remaining; i++) {
+      days.push({
+        date: new Date(year, month + 1, i),
+        isCurrentMonth: false,
+      });
     }
 
     return days;
@@ -73,7 +89,6 @@ export function FertilityCalendar({
   };
 
   const getCycleDayForDate = (dateString: string): number | null => {
-    // Find the most recent period start before this date
     const sortedPeriods = [...periods].sort((a, b) =>
       b.startDate.localeCompare(a.startDate)
     );
@@ -108,35 +123,46 @@ export function FertilityCalendar({
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
   };
 
+  const goToToday = () => setCurrentMonth(new Date());
+
   const today = new Date().toISOString().split("T")[0];
 
   return (
-    <div className="space-y-4">
+    <div className="w-full max-w-md mx-auto">
       {/* Month navigation */}
-      <div className="flex items-center justify-between">
-        <button
+      <div className="flex items-center justify-between mb-4">
+        <Button
+          variant="outline"
+          size="icon"
           onClick={goToPreviousMonth}
-          className="p-2 hover:bg-muted rounded-lg transition-colors"
         >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-        <h3 className="font-semibold text-lg">
-          {MONTHS_NL[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-        </h3>
-        <button
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold capitalize">
+            {MONTHS_NL[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+          </h2>
+          <Button variant="ghost" size="sm" onClick={goToToday}>
+            Vandaag
+          </Button>
+        </div>
+
+        <Button
+          variant="outline"
+          size="icon"
           onClick={goToNextMonth}
-          className="p-2 hover:bg-muted rounded-lg transition-colors"
         >
-          <ChevronRight className="w-5 h-5" />
-        </button>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
       </div>
 
       {/* Day headers */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-1 mb-2">
         {DAYS_NL.map((day) => (
           <div
             key={day}
-            className="text-center text-xs font-medium text-muted-foreground py-2"
+            className="flex items-center justify-center h-8 text-xs font-medium text-muted-foreground"
           >
             {day}
           </div>
@@ -145,12 +171,12 @@ export function FertilityCalendar({
 
       {/* Calendar grid */}
       <div className="grid grid-cols-7 gap-1">
-        {calendarDays.map((date, index) => {
-          if (!date) {
-            return <div key={`empty-${index}`} className="aspect-square" />;
+        {calendarDays.map((day, index) => {
+          if (!day.date) {
+            return <div key={`empty-${index}`} className="h-10" />;
           }
 
-          const dateString = date.toISOString().split("T")[0];
+          const dateString = day.date.toISOString().split("T")[0];
           const fertilityData = getFertilityForDate(dateString);
           const isPeriod = isPeriodDay(dateString);
           const cycleDay = getCycleDayForDate(dateString);
@@ -158,105 +184,54 @@ export function FertilityCalendar({
           const isOvulation = isOvulationDay(cycleDay);
           const isToday = dateString === today;
 
-          const hasTemperature = fertilityData?.temperature !== null && fertilityData?.temperature !== undefined;
-          const hasMucus = fertilityData?.cervicalMucus !== null;
-          const hasIntercourse = fertilityData?.intercourse === true;
-          const hasSupplements = fertilityData?.supplements === true;
-          const hasOvulationTest = fertilityData?.ovulationTest !== null;
+          const hasData = fertilityData && (
+            fertilityData.temperature !== null ||
+            fertilityData.cervicalMucus !== null ||
+            fertilityData.ovulationTest !== null ||
+            fertilityData.intercourse ||
+            fertilityData.supplements
+          );
 
           return (
             <button
               key={dateString}
               onClick={() => onDayClick(dateString)}
               className={cn(
-                "aspect-square p-1 rounded-lg transition-all relative flex flex-col items-center justify-start",
-                "hover:ring-2 hover:ring-pink-300",
-                isToday && "ring-2 ring-pink-500",
-                isPeriod && "bg-rose-100",
-                isOvulation && !isPeriod && "bg-purple-100",
-                isFertile && !isOvulation && !isPeriod && "bg-green-50"
+                "relative flex h-10 w-full items-center justify-center rounded-md text-sm transition-colors",
+                "hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                !day.isCurrentMonth && "text-muted-foreground/50",
+                isToday && "ring-2 ring-pink-500 ring-offset-2",
+                isPeriod && "bg-rose-200 hover:bg-rose-300 text-rose-900",
+                !isPeriod && isOvulation && "bg-purple-200 hover:bg-purple-300 text-purple-900",
+                !isPeriod && !isOvulation && isFertile && "bg-green-100 hover:bg-green-200 text-green-800"
               )}
             >
-              {/* Date number */}
-              <span
-                className={cn(
-                  "text-sm font-medium",
-                  isToday && "text-pink-600",
-                  isPeriod && "text-rose-700"
-                )}
-              >
-                {date.getDate()}
-              </span>
-
-              {/* Indicators */}
-              <div className="flex flex-wrap gap-0.5 justify-center mt-0.5">
-                {hasTemperature && (
-                  <ThermometerSun className="w-3 h-3 text-orange-500" />
-                )}
-                {hasMucus && (
-                  <Droplets className="w-3 h-3 text-blue-500" />
-                )}
-                {hasIntercourse && (
-                  <Heart className="w-3 h-3 text-red-500 fill-red-500" />
-                )}
-                {hasSupplements && (
-                  <Pill className="w-3 h-3 text-purple-500" />
-                )}
-                {hasOvulationTest && (
-                  <FlaskConical className={cn(
-                    "w-3 h-3",
-                    fertilityData?.ovulationTest === "positive" ? "text-green-600" : "text-gray-400"
-                  )} />
-                )}
-              </div>
-
-              {/* Fertility indicator dot */}
-              {(isFertile || isOvulation) && !isPeriod && (
-                <div
-                  className={cn(
-                    "absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full",
-                    isOvulation ? "bg-purple-500" : "bg-green-500"
-                  )}
-                />
+              <span>{day.date.getDate()}</span>
+              {hasData && (
+                <span className="absolute bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-pink-500" />
               )}
             </button>
           );
         })}
       </div>
 
-      {/* Legend */}
-      <div className="flex flex-wrap gap-4 text-xs text-muted-foreground pt-2 border-t">
+      {/* Compact Legend */}
+      <div className="flex flex-wrap gap-3 text-xs text-muted-foreground pt-3 mt-3 border-t">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-rose-100" />
+          <div className="w-3 h-3 rounded bg-rose-200" />
           <span>Menstruatie</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-green-50 border border-green-200" />
+          <div className="w-3 h-3 rounded bg-green-100 border border-green-200" />
           <span>Vruchtbaar</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-purple-100" />
+          <div className="w-3 h-3 rounded bg-purple-200" />
           <span>Ovulatie</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <ThermometerSun className="w-3 h-3 text-orange-500" />
-          <span>Temperatuur</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <Droplets className="w-3 h-3 text-blue-500" />
-          <span>Slijm</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <Heart className="w-3 h-3 text-red-500 fill-red-500" />
-          <span>Gemeenschap</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <Pill className="w-3 h-3 text-purple-500" />
-          <span>Supplementen</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <FlaskConical className="w-3 h-3 text-green-600" />
-          <span>Ovulatietest</span>
+          <div className="w-1.5 h-1.5 rounded-full bg-pink-500" />
+          <span>Data ingevuld</span>
         </div>
       </div>
     </div>
