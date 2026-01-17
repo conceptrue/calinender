@@ -8,6 +8,7 @@ import { SymptomsOverview } from "@/components/SymptomsOverview";
 import { NutritionFullView } from "@/components/NutritionFullView";
 import { ExerciseFullView } from "@/components/ExerciseFullView";
 import { RecipesView } from "@/components/RecipesView";
+import { PregnancyView } from "@/components/PregnancyView";
 import { Sidebar, type ViewType } from "@/components/Sidebar";
 import { useCycleData } from "@/hooks/useCycleData";
 import { getAllCalculations } from "@/lib/calculations";
@@ -215,6 +216,16 @@ export default function Home() {
         {activeView === "recepten" && (
           <div className="max-w-6xl mx-auto">
             <RecipesView
+              currentCycleDay={currentCycleDay}
+              cycleLength={averageCycleLength}
+            />
+          </div>
+        )}
+
+        {/* Zwanger worden View */}
+        {activeView === "zwanger" && (
+          <div className="max-w-4xl mx-auto">
+            <PregnancyView
               currentCycleDay={currentCycleDay}
               cycleLength={averageCycleLength}
             />

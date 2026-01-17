@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { APP_VERSION } from "@/lib/version";
-import { Calendar, Apple, Activity, Menu, X, ChefHat } from "lucide-react";
+import { Calendar, Apple, Activity, Menu, X, ChefHat, Baby } from "lucide-react";
 
-export type ViewType = "kalender" | "voeding" | "beweging" | "recepten";
+export type ViewType = "kalender" | "voeding" | "beweging" | "recepten" | "zwanger";
 
 interface SidebarProps {
   activeView: ViewType;
@@ -23,6 +23,7 @@ const navItems: NavItem[] = [
   { id: "voeding", label: "Voeding", icon: Apple },
   { id: "beweging", label: "Beweging", icon: Activity },
   { id: "recepten", label: "Recepten", icon: ChefHat },
+  { id: "zwanger", label: "Zwanger worden", icon: Baby },
 ];
 
 export function Sidebar({ activeView, onViewChange }: SidebarProps) {
