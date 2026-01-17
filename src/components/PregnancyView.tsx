@@ -331,7 +331,7 @@ export function PregnancyView({
         </Card>
       </div>
 
-      {/* Fertility Tips */}
+      {/* Tips - compact grid */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -340,19 +340,17 @@ export function PregnancyView({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             {fertilityTips.map((tip, index) => {
               const Icon = tip.icon;
               return (
                 <div
                   key={index}
-                  className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow"
+                  className="p-3 rounded-lg border bg-card hover:shadow-md transition-shadow text-center"
+                  title={tip.description}
                 >
-                  <div className="flex items-center gap-2 mb-2">
-                    <Icon className="w-5 h-5 text-pink-500" />
-                    <h3 className="font-medium">{tip.title}</h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{tip.description}</p>
+                  <Icon className="w-6 h-6 text-pink-500 mx-auto mb-2" />
+                  <h3 className="text-xs font-medium leading-tight">{tip.title}</h3>
                 </div>
               );
             })}
@@ -360,150 +358,124 @@ export function PregnancyView({
         </CardContent>
       </Card>
 
-      {/* Nutrition Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Apple className="w-5 h-5 text-green-500" />
-            Voeding voor vruchtbaarheid
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground mb-4">
-            Een gebalanceerd dieet rijk aan deze voedingsstoffen ondersteunt je
-            vruchtbaarheid en bereidt je lichaam voor op een gezonde zwangerschap.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {nutrients.map((nutrient, index) => {
-              const Icon = nutrient.icon;
-              return (
-                <div
-                  key={index}
-                  className="p-4 rounded-lg border bg-gradient-to-br from-green-50 to-emerald-50"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <Icon className="w-5 h-5 text-green-600" />
-                    <h3 className="font-semibold text-green-800">{nutrient.name}</h3>
+      {/* Voeding + Beweging naast elkaar */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Nutrition Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Apple className="w-5 h-5 text-green-500" />
+              Voeding
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {nutrients.map((nutrient, index) => {
+                const Icon = nutrient.icon;
+                return (
+                  <div
+                    key={index}
+                    className="p-3 rounded-lg border bg-gradient-to-br from-green-50 to-emerald-50"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Icon className="w-4 h-4 text-green-600 flex-shrink-0" />
+                      <h3 className="font-medium text-sm text-green-800">{nutrient.name}</h3>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{nutrient.benefit}</p>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {nutrient.benefit}
-                  </p>
-                  <div className="flex flex-wrap gap-1">
-                    {nutrient.sources.map((source, i) => (
-                      <Badge key={i} variant="secondary" className="text-xs">
-                        {source}
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Exercise Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Dumbbell className="w-5 h-5 text-blue-500" />
+              Beweging
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {exercises.map((exercise, index) => {
+                const Icon = exercise.icon;
+                return (
+                  <div
+                    key={index}
+                    className="p-3 rounded-lg border bg-gradient-to-br from-blue-50 to-indigo-50"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Icon className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                        <h3 className="font-medium text-sm text-blue-800">{exercise.name}</h3>
+                      </div>
+                      <Badge className="bg-blue-100 text-blue-800 text-xs">
+                        {exercise.frequency}
                       </Badge>
-                    ))}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-      {/* Exercise Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Dumbbell className="w-5 h-5 text-blue-500" />
-            Beweging voor vruchtbaarheid
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground mb-4">
-            Matige beweging verbetert de bloedcirculatie, hormoonbalans en algemene
-            gezondheid. Vermijd echter overtraining, wat de ovulatie kan verstoren.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {exercises.map((exercise, index) => {
-              const Icon = exercise.icon;
-              return (
-                <div
-                  key={index}
-                  className="p-4 rounded-lg border bg-gradient-to-br from-blue-50 to-indigo-50"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <Icon className="w-5 h-5 text-blue-600" />
-                    <h3 className="font-semibold text-blue-800">{exercise.name}</h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {exercise.benefit}
-                  </p>
-                  <Badge className="bg-blue-100 text-blue-800 text-xs">
-                    {exercise.frequency}
-                  </Badge>
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Vermijden + Supplementen naast elkaar */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* What to Avoid */}
+        <Card className="border-amber-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-amber-700">
+              <AlertCircle className="w-5 h-5" />
+              Vermijden
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-1.5">
+              {avoidList.map((item, index) => (
+                <li key={index} className="flex items-start gap-2 text-sm">
+                  <span className="text-amber-500 mt-0.5">•</span>
+                  <span className="text-muted-foreground">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
 
-      {/* What to Avoid */}
-      <Card className="border-amber-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-amber-700">
-            <AlertCircle className="w-5 h-5" />
-            Wat te vermijden
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-2">
-            {avoidList.map((item, index) => (
-              <li key={index} className="flex items-start gap-2">
-                <span className="text-amber-500 mt-1">•</span>
-                <span className="text-muted-foreground">{item}</span>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
-
-      {/* Supplements Card */}
-      <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-violet-50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-purple-700">
-            <Pill className="w-5 h-5" />
-            Aanbevolen supplementen
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 bg-white rounded-lg">
-              <h3 className="font-semibold text-purple-800 mb-2">Foliumzuur</h3>
-              <p className="text-sm text-muted-foreground">
-                400-800 mcg per dag. Start minimaal 1 maand vóór conceptie en
-                continueer tot 12 weken zwangerschap.
-              </p>
+        {/* Supplements Card */}
+        <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-violet-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-purple-700">
+              <Pill className="w-5 h-5" />
+              Supplementen
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="p-2 bg-white rounded-lg">
+                <h3 className="font-medium text-sm text-purple-800">Foliumzuur</h3>
+                <p className="text-xs text-muted-foreground">400-800 mcg/dag, 1 maand vóór conceptie</p>
+              </div>
+              <div className="p-2 bg-white rounded-lg">
+                <h3 className="font-medium text-sm text-purple-800">Vitamine D</h3>
+                <p className="text-xs text-muted-foreground">10-25 mcg/dag</p>
+              </div>
+              <div className="p-2 bg-white rounded-lg">
+                <h3 className="font-medium text-sm text-purple-800">Omega-3</h3>
+                <p className="text-xs text-muted-foreground">250-500 mg DHA/dag</p>
+              </div>
+              <div className="p-2 bg-white rounded-lg">
+                <h3 className="font-medium text-sm text-purple-800">Prenatale multivitamine</h3>
+                <p className="text-xs text-muted-foreground">Complete aanvulling</p>
+              </div>
             </div>
-            <div className="p-4 bg-white rounded-lg">
-              <h3 className="font-semibold text-purple-800 mb-2">Vitamine D</h3>
-              <p className="text-sm text-muted-foreground">
-                10-25 mcg per dag. Vooral belangrijk in de wintermaanden of bij
-                weinig zonblootstelling.
-              </p>
-            </div>
-            <div className="p-4 bg-white rounded-lg">
-              <h3 className="font-semibold text-purple-800 mb-2">Omega-3</h3>
-              <p className="text-sm text-muted-foreground">
-                250-500 mg DHA per dag. Kies voor algenolie als vegetarisch
-                alternatief voor visolie.
-              </p>
-            </div>
-            <div className="p-4 bg-white rounded-lg">
-              <h3 className="font-semibold text-purple-800 mb-2">Prenatale multivitamine</h3>
-              <p className="text-sm text-muted-foreground">
-                Een complete prenatale multivitamine vult eventuele tekorten aan
-                en ondersteunt een gezonde zwangerschap.
-              </p>
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground mt-4">
-            * Raadpleeg altijd je arts of verloskundige voordat je supplementen gaat gebruiken.
-          </p>
-        </CardContent>
-      </Card>
+            <p className="text-xs text-muted-foreground mt-3">* Raadpleeg je arts</p>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Fertility Day Detail Dialog */}
       <FertilityDayDetail
