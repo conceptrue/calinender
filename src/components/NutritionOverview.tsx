@@ -621,50 +621,54 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
   return (
     <div>
       {/* Tabs */}
-      <div className="grid grid-cols-4 gap-1 p-1 mb-4 bg-muted rounded-lg">
+      <div className="flex flex-wrap gap-2 mb-4">
         <button
           onClick={() => setActiveTab("plan")}
           className={cn(
-            "py-2 text-sm font-medium rounded-md transition-colors text-center",
+            "px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2",
             activeTab === "plan"
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
+              ? "bg-primary text-primary-foreground"
+              : "bg-green-50 text-green-700 hover:opacity-80"
           )}
         >
-          Plan
+          <span>📋</span>
+          <span>Plan</span>
         </button>
         <button
           onClick={() => setActiveTab("fases")}
           className={cn(
-            "py-2 text-sm font-medium rounded-md transition-colors text-center",
+            "px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2",
             activeTab === "fases"
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
+              ? "bg-primary text-primary-foreground"
+              : "bg-purple-50 text-purple-700 hover:opacity-80"
           )}
         >
-          Fases
+          <span>🔄</span>
+          <span>Fases</span>
         </button>
         <button
           onClick={() => setActiveTab("recent")}
           className={cn(
-            "py-2 text-sm font-medium rounded-md transition-colors text-center",
+            "px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2",
             activeTab === "recent"
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
+              ? "bg-primary text-primary-foreground"
+              : "bg-blue-50 text-blue-700 hover:opacity-80"
           )}
         >
-          Recent
+          <span>🍽️</span>
+          <span>Voeding</span>
         </button>
         <button
           onClick={() => setActiveTab("calendar")}
           className={cn(
-            "py-2 text-sm font-medium rounded-md transition-colors text-center",
+            "px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2",
             activeTab === "calendar"
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
+              ? "bg-primary text-primary-foreground"
+              : "bg-orange-50 text-orange-700 hover:opacity-80"
           )}
         >
-          Kalender
+          <span>📅</span>
+          <span>Kalender</span>
         </button>
       </div>
 
