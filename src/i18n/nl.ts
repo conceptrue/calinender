@@ -403,6 +403,9 @@ export const nl: Translations = {
     language: "Taal",
     languageNl: "Nederlands",
     languageEn: "English",
+    pwaInstall: "Installeer app",
+    pwaInstallDesc: "Voeg toe aan je homescreen voor snelle toegang",
+    pwaInstalled: "App is geïnstalleerd",
   },
 
   recipes: {

@@ -425,6 +425,9 @@ export interface Translations {
     language: string;
     languageNl: string;
     languageEn: string;
+    pwaInstall: string;
+    pwaInstallDesc: string;
+    pwaInstalled: string;
   };
 
   // Recipes

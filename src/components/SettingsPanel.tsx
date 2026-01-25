@@ -13,10 +13,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Download, Upload, Trash2, AlertTriangle, Globe } from "lucide-react";
+import { Download, Upload, Trash2, AlertTriangle, Globe, Smartphone } from "lucide-react";
 import type { CycleData, UserSettings, Language } from "@/types";
 import { exportDataAsJSON, importDataFromJSON } from "@/lib/dataExport";
 import { useTranslation } from "@/contexts/LanguageContext";
+import { usePWAInstall } from "@/hooks/usePWAInstall";
 
 interface SettingsPanelProps {
   isOpen: boolean;
@@ -40,10 +41,12 @@ export function SettingsPanel({
   onDeleteAllData,
 }: SettingsPanelProps) {
   const { t } = useTranslation();
+  const { canInstall, install } = usePWAInstall();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [importSuccess, setImportSuccess] = useState(false);
+  const [pwaInstalled, setPwaInstalled] = useState(false);
 
   // Local state for settings (applied on save)
   const [localSettings, setLocalSettings] = useState<UserSettings>(cycleData.settings);
@@ -123,6 +126,14 @@ export function SettingsPanel({
     setLocalSettings((prev) => ({ ...prev, language: lang }));
   };
 
+  // Handle PWA install
+  const handleInstall = useCallback(async () => {
+    const accepted = await install();
+    if (accepted) {
+      setPwaInstalled(true);
+    }
+  }, [install]);
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
@@ -164,6 +175,33 @@ export function SettingsPanel({
                 </div>
               </CardContent>
             </Card>
+
+            {/* PWA Install */}
+            {(canInstall || pwaInstalled) && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Smartphone className="w-4 h-4" />
+                    App
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {pwaInstalled ? (
+                    <p className="text-sm text-green-600">{t.settings.pwaInstalled}</p>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        {t.settings.pwaInstallDesc}
+                      </p>
+                      <Button onClick={handleInstall} className="w-full">
+                        <Smartphone className="w-4 h-4 mr-2" />
+                        {t.settings.pwaInstall}
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Section 1: Cyclus Parameters */}
             <Card>
