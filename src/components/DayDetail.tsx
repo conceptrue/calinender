@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { format, parseISO } from "date-fns";
-import { nl } from "date-fns/locale";
+import { nl, enUS } from "date-fns/locale";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/contexts/LanguageContext";
 import type { DaySymptom, Mood, PainLevel, EnergyLevel, NutritionLevel, ExerciseType } from "@/types";
 
 interface DayDetailProps {
@@ -32,48 +33,6 @@ interface DayDetailProps {
   }) => void;
 }
 
-const moodOptions: { value: Mood; emoji: string; label: string }[] = [
-  { value: "happy", emoji: "😊", label: "Blij" },
-  { value: "neutral", emoji: "😐", label: "Neutraal" },
-  { value: "irritable", emoji: "😤", label: "Prikkelbaar" },
-  { value: "sad", emoji: "😢", label: "Verdrietig" },
-  { value: "emotional", emoji: "🥺", label: "Emotioneel" },
-];
-
-const painOptions: { value: PainLevel; label: string }[] = [
-  { value: "none", label: "Geen" },
-  { value: "light", label: "Licht" },
-  { value: "moderate", label: "Matig" },
-  { value: "intense", label: "Hevig" },
-  { value: "severe", label: "Ernstig" },
-];
-
-const energyLabels: Record<number, string> = {
-  1: "Zeer laag",
-  2: "Laag",
-  3: "Normaal",
-  4: "Hoog",
-  5: "Zeer hoog",
-};
-
-const nutritionOptions: { value: NutritionLevel; emoji: string; label: string }[] = [
-  { value: "healthy", emoji: "🥗", label: "Gezond" },
-  { value: "balanced", emoji: "🍽️", label: "Normaal" },
-  { value: "unhealthy", emoji: "🍕", label: "Ongezond" },
-  { value: "cravings", emoji: "🍫", label: "Cravings" },
-];
-
-const exerciseOptions: { value: ExerciseType; emoji: string; label: string }[] = [
-  { value: "walking", emoji: "🚶", label: "Wandelen" },
-  { value: "running", emoji: "🏃", label: "Hardlopen" },
-  { value: "cycling", emoji: "🚴", label: "Fietsen" },
-  { value: "swimming", emoji: "🏊", label: "Zwemmen" },
-  { value: "gym", emoji: "🏋️", label: "Fitness" },
-  { value: "yoga", emoji: "🧘", label: "Yoga" },
-  { value: "sports", emoji: "⚽", label: "Sport" },
-  { value: "other", emoji: "💪", label: "Anders" },
-];
-
 // Inner component that uses key to reset state when date changes
 function DayDetailContent({
   dateString,
@@ -83,6 +42,7 @@ function DayDetailContent({
   onTogglePeriod,
   onUpdateSymptom,
 }: DayDetailProps) {
+  const { t, language } = useTranslation();
   const [notes, setNotes] = useState(symptom?.notes ?? "");
   const [localMood, setLocalMood] = useState<Mood>(symptom?.mood ?? null);
   const [localPain, setLocalPain] = useState<PainLevel>(symptom?.pain ?? null);
@@ -91,10 +51,53 @@ function DayDetailContent({
   const [localExercise, setLocalExercise] = useState<ExerciseType>(symptom?.exercise ?? null);
   const [localExerciseMinutes, setLocalExerciseMinutes] = useState<number | null>(symptom?.exerciseMinutes ?? null);
 
+  const moodOptions = useMemo(() => [
+    { value: "happy" as Mood, emoji: "😊", label: t.moods.happy },
+    { value: "neutral" as Mood, emoji: "😐", label: t.moods.neutral },
+    { value: "irritable" as Mood, emoji: "😤", label: t.moods.irritable },
+    { value: "sad" as Mood, emoji: "😢", label: t.moods.sad },
+    { value: "emotional" as Mood, emoji: "🥺", label: t.moods.emotional },
+  ], [t]);
+
+  const painOptions = useMemo(() => [
+    { value: "none" as PainLevel, label: t.pain.none },
+    { value: "light" as PainLevel, label: t.pain.light },
+    { value: "moderate" as PainLevel, label: t.pain.moderate },
+    { value: "intense" as PainLevel, label: t.pain.intense },
+    { value: "severe" as PainLevel, label: t.pain.severe },
+  ], [t]);
+
+  const energyLabels = useMemo(() => ({
+    1: t.energy.veryLow,
+    2: t.energy.low,
+    3: t.energy.normal,
+    4: t.energy.high,
+    5: t.energy.veryHigh,
+  }), [t]);
+
+  const nutritionOptions = useMemo(() => [
+    { value: "healthy" as NutritionLevel, emoji: "🥗", label: t.nutrition.healthy },
+    { value: "balanced" as NutritionLevel, emoji: "🍽️", label: t.nutrition.balanced },
+    { value: "unhealthy" as NutritionLevel, emoji: "🍕", label: t.nutrition.unhealthy },
+    { value: "cravings" as NutritionLevel, emoji: "🍫", label: t.nutrition.cravings },
+  ], [t]);
+
+  const exerciseOptions = useMemo(() => [
+    { value: "walking" as ExerciseType, emoji: "🚶", label: t.exercise.walking },
+    { value: "running" as ExerciseType, emoji: "🏃", label: t.exercise.running },
+    { value: "cycling" as ExerciseType, emoji: "🚴", label: t.exercise.cycling },
+    { value: "swimming" as ExerciseType, emoji: "🏊", label: t.exercise.swimming },
+    { value: "gym" as ExerciseType, emoji: "🏋️", label: t.exercise.gym },
+    { value: "yoga" as ExerciseType, emoji: "🧘", label: t.exercise.yoga },
+    { value: "sports" as ExerciseType, emoji: "⚽", label: t.exercise.sports },
+    { value: "other" as ExerciseType, emoji: "💪", label: t.exercise.other },
+  ], [t]);
+
   if (!dateString) return null;
 
+  const dateLocale = language === "en" ? enUS : nl;
   const formattedDate = format(parseISO(dateString), "EEEE d MMMM yyyy", {
-    locale: nl,
+    locale: dateLocale,
   });
 
   const handleSave = () => {
@@ -123,21 +126,21 @@ function DayDetailContent({
       <div className="space-y-6">
         {/* Period Toggle */}
         <div>
-          <label className="text-sm font-medium mb-2 block">Periode</label>
+          <label className="text-sm font-medium mb-2 block">{t.cycle.period}</label>
           <Button
             variant={isPeriod ? "default" : "outline"}
             onClick={onTogglePeriod}
             className={cn(isPeriod && "bg-red-500 hover:bg-red-600")}
           >
             {isPeriod
-              ? "Periode (klik om te verwijderen)"
-              : "Markeer als periode"}
+              ? t.dayDetail.periodClickToRemove
+              : t.dayDetail.markAsPeriod}
           </Button>
         </div>
 
         {/* Mood Selector */}
         <div>
-          <label className="text-sm font-medium mb-2 block">Stemming</label>
+          <label className="text-sm font-medium mb-2 block">{t.dayDetail.mood}</label>
           <div className="flex flex-wrap gap-2">
             {moodOptions.map((option) => (
               <button
@@ -162,7 +165,7 @@ function DayDetailContent({
 
         {/* Pain Selector */}
         <div>
-          <label className="text-sm font-medium mb-2 block">Pijn</label>
+          <label className="text-sm font-medium mb-2 block">{t.dayDetail.painLevel}</label>
           <div className="flex flex-wrap gap-2">
             {painOptions.map((option) => (
               <button
@@ -187,7 +190,7 @@ function DayDetailContent({
         {/* Energy Slider */}
         <div>
           <label className="text-sm font-medium mb-2 block">
-            Energie: {localEnergy ? energyLabels[localEnergy] : "Niet ingesteld"}
+            {t.dayDetail.energyLevel}: {localEnergy ? energyLabels[localEnergy] : t.common.notSet}
           </label>
           <div className="px-2">
             <Slider
@@ -199,15 +202,15 @@ function DayDetailContent({
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
-              <span>Laag</span>
-              <span>Hoog</span>
+              <span>{t.common.low}</span>
+              <span>{t.common.high}</span>
             </div>
           </div>
         </div>
 
         {/* Nutrition Selector */}
         <div>
-          <label className="text-sm font-medium mb-2 block">Voeding</label>
+          <label className="text-sm font-medium mb-2 block">{t.dayDetail.nutritionToday}</label>
           <div className="flex flex-wrap gap-2">
             {nutritionOptions.map((option) => (
               <button
@@ -232,7 +235,7 @@ function DayDetailContent({
 
         {/* Exercise Selector */}
         <div>
-          <label className="text-sm font-medium mb-2 block">Beweging / Sport</label>
+          <label className="text-sm font-medium mb-2 block">{t.dayDetail.exerciseToday}</label>
           <div className="flex flex-wrap gap-2">
             {exerciseOptions.map((option) => (
               <button
@@ -261,7 +264,7 @@ function DayDetailContent({
           {localExercise && (
             <div className="mt-3">
               <label className="text-sm text-muted-foreground mb-2 block">
-                Duur: {localExerciseMinutes ?? 30} minuten
+                {t.exercise.duration}: {localExerciseMinutes ?? 30} {t.common.minutes}
               </label>
               <Slider
                 value={[localExerciseMinutes ?? 30]}
@@ -273,7 +276,7 @@ function DayDetailContent({
               />
               <div className="flex justify-between text-xs text-muted-foreground mt-1">
                 <span>5 min</span>
-                <span>3 uur</span>
+                <span>3 {t.common.hours}</span>
               </div>
             </div>
           )}
@@ -281,18 +284,18 @@ function DayDetailContent({
 
         {/* Notes */}
         <div>
-          <label className="text-sm font-medium mb-2 block">Notities</label>
+          <label className="text-sm font-medium mb-2 block">{t.dayDetail.notes}</label>
           <Textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Voeg notities toe..."
+            placeholder={t.dayDetail.notesPlaceholder}
             rows={3}
           />
         </div>
 
         {/* Save Button */}
         <div className="flex justify-end pt-4 sticky bottom-0 bg-background pb-2 -mb-2">
-          <Button onClick={handleSave} className="w-full sm:w-auto">Opslaan</Button>
+          <Button onClick={handleSave} className="w-full sm:w-auto">{t.common.save}</Button>
         </div>
       </div>
     </>

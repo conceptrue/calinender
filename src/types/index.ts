@@ -35,9 +35,18 @@ export interface DaySymptom {
   notes: string;
 }
 
+export interface NotificationSettings {
+  remindersEnabled: boolean;
+  daysBeforePeriod: number; // 1-7 days
+}
+
+export type Language = "nl" | "en";
+
 export interface UserSettings {
   averageCycleLength: number; // default: 28
   averagePeriodLength: number; // default: 5
+  notifications: NotificationSettings;
+  language: Language;
 }
 
 export interface CycleData {
@@ -47,9 +56,16 @@ export interface CycleData {
   settings: UserSettings;
 }
 
+export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
+  remindersEnabled: false,
+  daysBeforePeriod: 2,
+};
+
 export const DEFAULT_SETTINGS: UserSettings = {
   averageCycleLength: 28,
   averagePeriodLength: 5,
+  notifications: DEFAULT_NOTIFICATION_SETTINGS,
+  language: "nl",
 };
 
 export const DEFAULT_CYCLE_DATA: CycleData = {

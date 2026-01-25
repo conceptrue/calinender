@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { APP_VERSION } from "@/lib/version";
-import { Calendar, Apple, Activity, Menu, X, ChefHat, Baby } from "lucide-react";
+import { Calendar, Apple, Activity, Menu, X, ChefHat, Baby, Settings } from "lucide-react";
+import { useTranslation } from "@/contexts/LanguageContext";
 
 export type ViewType = "kalender" | "voeding" | "beweging" | "recepten" | "zwanger";
 
 interface SidebarProps {
   activeView: ViewType;
   onViewChange: (view: ViewType) => void;
+  onSettingsClick: () => void;
 }
 
 interface NavItem {
@@ -18,16 +20,17 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
 }
 
-const navItems: NavItem[] = [
-  { id: "kalender", label: "Kalender", icon: Calendar },
-  { id: "voeding", label: "Voeding", icon: Apple },
-  { id: "beweging", label: "Beweging", icon: Activity },
-  { id: "recepten", label: "Recepten", icon: ChefHat },
-  { id: "zwanger", label: "Zwanger worden", icon: Baby },
-];
-
-export function Sidebar({ activeView, onViewChange }: SidebarProps) {
+export function Sidebar({ activeView, onViewChange, onSettingsClick }: SidebarProps) {
+  const { t } = useTranslation();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  const navItems: NavItem[] = useMemo(() => [
+    { id: "kalender", label: t.nav.calendar, icon: Calendar },
+    { id: "voeding", label: t.nav.nutrition, icon: Apple },
+    { id: "beweging", label: t.nav.exercise, icon: Activity },
+    { id: "recepten", label: t.nav.recipes, icon: ChefHat },
+    { id: "zwanger", label: t.nav.pregnancy, icon: Baby },
+  ], [t]);
 
   return (
     <>
@@ -68,10 +71,10 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
           {/* App name - always visible on desktop */}
           <div className="ml-3">
             <p className="font-semibold text-sidebar-foreground whitespace-nowrap">
-              Calinender
+              {t.app.name}
             </p>
             <p className="text-xs text-muted-foreground whitespace-nowrap">
-              Privé & lokaal
+              {t.app.tagline}
             </p>
           </div>
 
@@ -128,12 +131,26 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
 
         {/* Footer */}
         <div className="p-4 border-t border-sidebar-border">
-          <p className="text-xs text-muted-foreground">
-            Alle data blijft lokaal
-          </p>
-          <p className="text-xs text-muted-foreground/60 mt-1">
-            v{APP_VERSION}
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-muted-foreground">
+                {t.app.dataLocal}
+              </p>
+              <p className="text-xs text-muted-foreground/60 mt-1">
+                {t.app.version}{APP_VERSION}
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                onSettingsClick();
+                setIsMobileOpen(false);
+              }}
+              className="p-2 rounded-lg text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+              aria-label={t.nav.settings}
+            >
+              <Settings className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </aside>
     </>

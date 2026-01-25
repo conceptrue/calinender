@@ -2,11 +2,13 @@
 
 import { useState, useMemo } from "react";
 import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, subMonths, addMonths } from "date-fns";
-import { nl } from "date-fns/locale";
+import { nl, enUS } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/contexts/LanguageContext";
 import type { DaySymptom } from "@/types";
+import type { Translations } from "@/i18n/types";
 
 type ViewType = "plan" | "fases" | "recent" | "calendar";
 
@@ -17,18 +19,13 @@ interface NutritionOverviewProps {
   cycleLength: number;
 }
 
-const nutritionConfig: Record<string, { emoji: string; label: string; color: string }> = {
-  healthy: { emoji: "🥗", label: "Gezond", color: "bg-green-100 text-green-800" },
-  balanced: { emoji: "🍽️", label: "Normaal", color: "bg-gray-100 text-gray-800" },
-  unhealthy: { emoji: "🍕", label: "Ongezond", color: "bg-orange-100 text-orange-800" },
-  cravings: { emoji: "🍫", label: "Cravings", color: "bg-purple-100 text-purple-800" },
-};
-
-interface Recipe {
-  name: string;
-  emoji: string;
-  ingredients: string[];
-  description: string;
+function getNutritionConfig(t: Translations) {
+  return {
+    healthy: { emoji: "🥗", label: t.nutrition.healthy, color: "bg-green-100 text-green-800" },
+    balanced: { emoji: "🍽️", label: t.nutrition.balanced, color: "bg-gray-100 text-gray-800" },
+    unhealthy: { emoji: "🍕", label: t.nutrition.unhealthy, color: "bg-orange-100 text-orange-800" },
+    cravings: { emoji: "🍫", label: t.nutrition.cravings, color: "bg-purple-100 text-purple-800" },
+  };
 }
 
 interface NutritionPhase {
@@ -41,265 +38,178 @@ interface NutritionPhase {
   recommended: string[];
   avoid: string[];
   tips: string[];
-  recipes: Recipe[];
 }
 
-function getNutritionPhase(cycleDay: number, cycleLength: number): NutritionPhase {
+function getNutritionPhase(cycleDay: number, cycleLength: number, t: Translations): NutritionPhase {
   const ovulationDay = Math.round(cycleLength / 2);
 
-  // Menstruatie (dag 1-5)
+  // Menstruation (day 1-5)
   if (cycleDay <= 5) {
     return {
-      name: "Menstruatie",
+      name: t.phases.menstruation,
       emoji: "🌙",
-      focus: "IJzer & Herstel",
+      focus: t.nutrition.ironRecovery,
       color: "text-red-700",
       bgColor: "bg-red-50",
-      description: "Focus op ijzerrijke voeding om bloedverlies te compenseren. Warm, voedzaam eten helpt.",
+      description: t.nutrition.menstruationDesc,
       recommended: [
-        "🥩 Rood vlees / lever",
-        "🥬 Spinazie & bladgroenten",
-        "🫘 Linzen & bonen",
-        "🍫 Pure chocolade",
-        "🍵 Gemberthee",
-        "🐟 Vette vis (zalm)",
+        t.nutrition.redMeat,
+        t.nutrition.spinachGreens,
+        t.nutrition.lentilsBeans,
+        t.nutrition.darkChocolate,
+        t.nutrition.gingerTea,
+        t.nutrition.fattyFish,
       ],
       avoid: [
-        "🧂 Zout (vocht vasthouden)",
-        "☕ Te veel cafeïne",
-        "🍷 Alcohol",
-        "🍬 Geraffineerde suiker",
+        t.nutrition.salt,
+        t.nutrition.tooMuchCaffeine,
+        t.nutrition.alcohol,
+        t.nutrition.refinedSugar,
       ],
       tips: [
-        "Combineer ijzer met vitamine C voor betere opname",
-        "Warme soepen en stoofpotten zijn ideaal",
-        "Magnesiumrijk voedsel helpt tegen krampen",
-      ],
-      recipes: [
-        {
-          name: "Spinazie-linzensoep",
-          emoji: "🥣",
-          ingredients: ["Rode linzen", "Spinazie", "Tomaten", "Gember", "Knoflook", "Komijn"],
-          description: "Verwarmende soep vol ijzer. Voeg citroensap toe voor vitamine C.",
-        },
-        {
-          name: "Zalm met bietensalade",
-          emoji: "🐟",
-          ingredients: ["Zalmfilet", "Rode biet", "Rucola", "Walnoten", "Geitenkaas"],
-          description: "Omega-3 en ijzer in één gerecht. Perfect voor herstel.",
-        },
-        {
-          name: "Chocolade-bananensmothie",
-          emoji: "🍫",
-          ingredients: ["Banaan", "Cacao", "Spinazie", "Amandelmelk", "Dadels"],
-          description: "Zoet maar gezond. Magnesium helpt tegen krampen.",
-        },
+        t.nutrition.tipIronVitC,
+        t.nutrition.tipWarmSoups,
+        t.nutrition.tipMagnesium,
       ],
     };
   }
 
-  // Folliculaire fase (dag 6 tot ovulatie)
+  // Follicular phase (day 6 to ovulation)
   if (cycleDay <= ovulationDay - 2) {
     return {
-      name: "Folliculaire fase",
+      name: t.phases.follicular,
       emoji: "🌱",
-      focus: "Energie & Groei",
+      focus: t.nutrition.energyGrowth,
       color: "text-green-700",
       bgColor: "bg-green-50",
-      description: "Je metabolisme versnelt. Ideaal moment voor lichtere, frisse maaltijden met veel eiwitten.",
+      description: t.nutrition.follicularDesc,
       recommended: [
-        "🥚 Eieren",
-        "🥗 Verse salades",
-        "🍗 Magere eiwitten",
-        "🥑 Avocado",
-        "🫐 Bessen",
-        "🥜 Noten & zaden",
+        t.nutrition.eggs,
+        t.nutrition.freshSalads,
+        t.nutrition.leanProteins,
+        t.nutrition.avocado,
+        t.nutrition.berries,
+        t.nutrition.nutsSeeds,
       ],
       avoid: [
-        "🍟 Gefrituurde voeding",
-        "🥤 Suikerhoudende dranken",
+        t.nutrition.friedFood,
+        t.nutrition.sugaryDrinks,
       ],
       tips: [
-        "Probiotische voeding ondersteunt oestrogeenbalans",
-        "Gefermenteerde groenten zijn nu extra goed",
-        "Lichte, kleurrijke maaltijden passen bij je energie",
-      ],
-      recipes: [
-        {
-          name: "Poké bowl met kip",
-          emoji: "🥗",
-          ingredients: ["Kipfilet", "Sushi rijst", "Avocado", "Edamame", "Komkommer", "Sesamzaad"],
-          description: "Lichte, eiwitrijke bowl vol energie voor actieve dagen.",
-        },
-        {
-          name: "Shakshuka",
-          emoji: "🥚",
-          ingredients: ["Eieren", "Tomaten", "Paprika", "Ui", "Komijn", "Feta"],
-          description: "Mediterraans ontbijt vol eiwitten en groenten.",
-        },
-        {
-          name: "Bessen-yoghurt parfait",
-          emoji: "🫐",
-          ingredients: ["Griekse yoghurt", "Gemengde bessen", "Granola", "Honing", "Chiazaad"],
-          description: "Probiotica en antioxidanten voor hormoonbalans.",
-        },
+        t.nutrition.tipProbiotics,
+        t.nutrition.tipFermented,
+        t.nutrition.tipLightColorful,
       ],
     };
   }
 
-  // Ovulatie (rond dag 14)
+  // Ovulation (around day 14)
   if (cycleDay <= ovulationDay + 2) {
     return {
-      name: "Ovulatie",
+      name: t.phases.ovulation,
       emoji: "☀️",
-      focus: "Antioxidanten & Vezels",
+      focus: t.nutrition.antioxidantsFiber,
       color: "text-yellow-700",
       bgColor: "bg-yellow-50",
-      description: "Je bent op je piek! Ondersteun je lever met vezelrijk voedsel voor hormoonbalans.",
+      description: t.nutrition.ovulationDesc,
       recommended: [
-        "🥦 Kruisbloemige groenten",
-        "🫑 Paprika & tomaten",
-        "🍓 Vers fruit",
-        "🌾 Volkoren granen",
-        "🥒 Komkommer & selderij",
-        "💧 Extra water",
+        t.nutrition.cruciferous,
+        t.nutrition.peppersTomat,
+        t.nutrition.freshFruit,
+        t.nutrition.wholeGrains,
+        t.nutrition.cucumberCelery,
+        t.nutrition.extraWater,
       ],
       avoid: [
-        "🍖 Vet vlees",
-        "🧀 Volle zuivel",
-        "🍺 Alcohol",
+        t.nutrition.fattyMeat,
+        t.nutrition.fullFatDairy,
+        t.nutrition.alcohol,
       ],
       tips: [
-        "Vezels helpen overtollig oestrogeen af te voeren",
-        "Drink extra water voor optimale hydratatie",
-        "Rauwe groenten ondersteunen je energie",
-      ],
-      recipes: [
-        {
-          name: "Rainbow salade",
-          emoji: "🥗",
-          ingredients: ["Broccoli", "Rode kool", "Wortel", "Paprika", "Quinoa", "Citroendressing"],
-          description: "Kleurrijke salade vol vezels en antioxidanten.",
-        },
-        {
-          name: "Groene smoothie bowl",
-          emoji: "🥬",
-          ingredients: ["Boerenkool", "Mango", "Banaan", "Kokoswater", "Chiazaad", "Kokos"],
-          description: "Detox smoothie die je lever ondersteunt.",
-        },
-        {
-          name: "Geroosterde bloemkoolsteak",
-          emoji: "🥦",
-          ingredients: ["Bloemkool", "Kurkuma", "Tahini", "Granaatappel", "Peterselie"],
-          description: "Kruisbloemige groente die oestrogeen balanceert.",
-        },
+        t.nutrition.tipFiberEstrogen,
+        t.nutrition.tipExtraWater,
+        t.nutrition.tipRawVeggies,
       ],
     };
   }
 
-  // Vroege luteale fase (na ovulatie, eerste helft)
+  // Early luteal phase (after ovulation, first half)
   if (cycleDay <= ovulationDay + 7) {
     return {
-      name: "Vroege luteale fase",
+      name: t.phases.earlyLuteal,
       emoji: "🍂",
-      focus: "Complexe Koolhydraten",
+      focus: t.nutrition.complexCarbs,
       color: "text-orange-700",
       bgColor: "bg-orange-50",
-      description: "Progesteron stijgt. Complexe koolhydraten helpen je bloedsuiker stabiel te houden.",
+      description: t.nutrition.earlyLutealDesc,
       recommended: [
-        "🍠 Zoete aardappel",
-        "🍚 Bruine rijst",
-        "🥣 Havermout",
-        "🍌 Banaan",
-        "🥜 Pindakaas",
-        "🫘 Kikkererwten",
+        t.nutrition.sweetPotato,
+        t.nutrition.brownRice,
+        t.nutrition.oatmeal,
+        t.nutrition.banana,
+        t.nutrition.peanutButter,
+        t.nutrition.chickpeas,
       ],
       avoid: [
-        "🍭 Snoep & koekjes",
-        "🥐 Wit brood",
-        "🍿 Gezouten snacks",
+        t.nutrition.candyCookies,
+        t.nutrition.whiteBread,
+        t.nutrition.saltedSnacks,
       ],
       tips: [
-        "Eet regelmatig om bloedsuikerdips te voorkomen",
-        "B-vitamines ondersteunen je stemming",
-        "Magnesium helpt tegen vroege PMS-klachten",
-      ],
-      recipes: [
-        {
-          name: "Zoete aardappel curry",
-          emoji: "🍠",
-          ingredients: ["Zoete aardappel", "Kikkererwten", "Kokosmelk", "Spinazie", "Curry", "Gember"],
-          description: "Comfortfood met complexe koolhydraten en eiwitten.",
-        },
-        {
-          name: "Overnight oats",
-          emoji: "🥣",
-          ingredients: ["Havermout", "Amandelmelk", "Chiazaad", "Banaan", "Pindakaas", "Kaneel"],
-          description: "Makkelijk ontbijt dat bloedsuiker stabiel houdt.",
-        },
-        {
-          name: "Buddha bowl",
-          emoji: "🍚",
-          ingredients: ["Bruine rijst", "Hummus", "Geroosterde groenten", "Avocado", "Tahini"],
-          description: "Voedzame bowl met langzame koolhydraten.",
-        },
+        t.nutrition.tipEatRegularly,
+        t.nutrition.tipBVitamins,
+        t.nutrition.tipMagnesiumPMS,
       ],
     };
   }
 
-  // Late luteale fase (PMS periode)
+  // Late luteal phase (PMS period)
   return {
-    name: "Late luteale fase",
+    name: t.phases.lateLuteal,
     emoji: "🌧️",
-    focus: "Anti-inflammatoir & Comfort",
+    focus: t.nutrition.antiInflammatory,
     color: "text-purple-700",
     bgColor: "bg-purple-50",
-    description: "PMS-periode. Focus op ontstekingsremmend voedsel en geef toe aan gezonde cravings.",
+    description: t.nutrition.lateLutealDesc,
     recommended: [
-      "🍫 Pure chocolade (70%+)",
-      "🐟 Vette vis (omega-3)",
-      "🥬 Bladgroenten",
-      "🍵 Kamillethee",
-      "🥜 Walnoten",
-      "🫚 Kurkuma & gember",
+      t.nutrition.darkChoc70,
+      t.nutrition.fattyFish,
+      t.nutrition.leafyGreens,
+      t.nutrition.chamomileTea,
+      t.nutrition.walnuts,
+      t.nutrition.turmericGinger,
     ],
     avoid: [
-      "🧂 Zout (opgeblazen gevoel)",
-      "☕ Te veel cafeïne",
-      "🍷 Alcohol",
-      "🍬 Suiker (stemmingswisselingen)",
+      t.nutrition.salt,
+      t.nutrition.tooMuchCaffeine,
+      t.nutrition.alcohol,
+      t.nutrition.sugarMoodSwings,
     ],
     tips: [
-      "Pure chocolade (met mate) is prima bij cravings",
-      "Omega-3 helpt tegen stemmingswisselingen",
-      "Vermijd zout om opgeblazen gevoel te beperken",
-    ],
-    recipes: [
-      {
-        name: "Gouden melk",
-        emoji: "🍵",
-        ingredients: ["Amandelmelk", "Kurkuma", "Gember", "Kaneel", "Honing", "Zwarte peper"],
-        description: "Ontstekingsremmende warme drank voor ontspanning.",
-      },
-      {
-        name: "Zalm met groenten",
-        emoji: "🐟",
-        ingredients: ["Zalmfilet", "Broccoli", "Asperges", "Citroen", "Dille", "Olijfolie"],
-        description: "Omega-3 rijke maaltijd die stemming ondersteunt.",
-      },
-      {
-        name: "Chocolade energy balls",
-        emoji: "🍫",
-        ingredients: ["Dadels", "Cacao", "Walnoten", "Havermout", "Kokos", "Zeezout"],
-        description: "Gezonde snack voor chocolade cravings.",
-      },
+      t.nutrition.tipDarkChocOk,
+      t.nutrition.tipOmega3Mood,
+      t.nutrition.tipAvoidSaltBloat,
     ],
   };
 }
 
 export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycleLength }: NutritionOverviewProps) {
+  const { t, language } = useTranslation();
   const [activeTab, setActiveTab] = useState<ViewType>("plan");
   const [currentMonth, setCurrentMonth] = useState(new Date());
+
+  const dateLocale = language === "en" ? enUS : nl;
+  const nutritionConfig = useMemo(() => getNutritionConfig(t), [t]);
+
+  const weekdays = useMemo(() => [
+    t.weekdaysShort.mon,
+    t.weekdaysShort.tue,
+    t.weekdaysShort.wed,
+    t.weekdaysShort.thu,
+    t.weekdaysShort.fri,
+    t.weekdaysShort.sat,
+    t.weekdaysShort.sun,
+  ], [t]);
 
   const symptomsByDate = useMemo(() => {
     const map = new Map<string, DaySymptom>();
@@ -322,26 +232,25 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
 
   const currentPhase = useMemo(() => {
     if (!currentCycleDay) return null;
-    return getNutritionPhase(currentCycleDay, cycleLength);
-  }, [currentCycleDay, cycleLength]);
+    return getNutritionPhase(currentCycleDay, cycleLength, t);
+  }, [currentCycleDay, cycleLength, t]);
 
   const allPhases = useMemo(() => {
-    // Bereken representatieve dagen voor elke fase
     const ovulationDay = Math.round(cycleLength / 2);
     return [
-      { day: 3, phase: getNutritionPhase(3, cycleLength) },
-      { day: ovulationDay - 4, phase: getNutritionPhase(ovulationDay - 4, cycleLength) },
-      { day: ovulationDay, phase: getNutritionPhase(ovulationDay, cycleLength) },
-      { day: ovulationDay + 4, phase: getNutritionPhase(ovulationDay + 4, cycleLength) },
-      { day: cycleLength - 3, phase: getNutritionPhase(cycleLength - 3, cycleLength) },
+      { day: 3, phase: getNutritionPhase(3, cycleLength, t) },
+      { day: ovulationDay - 4, phase: getNutritionPhase(ovulationDay - 4, cycleLength, t) },
+      { day: ovulationDay, phase: getNutritionPhase(ovulationDay, cycleLength, t) },
+      { day: ovulationDay + 4, phase: getNutritionPhase(ovulationDay + 4, cycleLength, t) },
+      { day: cycleLength - 3, phase: getNutritionPhase(cycleLength - 3, cycleLength, t) },
     ];
-  }, [cycleLength]);
+  }, [cycleLength, t]);
 
   const renderPlanView = () => {
     if (!currentCycleDay || !currentPhase) {
       return (
         <div className="text-center py-6 text-muted-foreground">
-          <p>Registreer eerst een periode om je voedingsplan te zien.</p>
+          <p>{t.nutrition.registerPeriodFirst}</p>
         </div>
       );
     }
@@ -354,20 +263,20 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
             <span className="text-3xl">{currentPhase.emoji}</span>
             <div>
               <h4 className={`font-semibold ${currentPhase.color}`}>{currentPhase.name}</h4>
-              <p className="text-sm text-muted-foreground">Dag {currentCycleDay} van je cyclus</p>
+              <p className="text-sm text-muted-foreground">{t.common.day} {currentCycleDay} {t.cycle.ofYourCycle}</p>
             </div>
           </div>
           <p className="text-sm mb-3">{currentPhase.description}</p>
 
           <div className="text-sm">
-            <span className="text-muted-foreground">Focus:</span>
+            <span className="text-muted-foreground">{t.nutrition.focus}:</span>
             <span className={`ml-1 font-medium ${currentPhase.color}`}>{currentPhase.focus}</span>
           </div>
         </div>
 
         {/* Recommendations */}
         <div className="border rounded-lg p-4">
-          <h4 className="font-medium text-green-700 mb-2">✓ Aanbevolen voeding</h4>
+          <h4 className="font-medium text-green-700 mb-2">✓ {t.nutrition.recommended}</h4>
           <div className="flex flex-wrap gap-2">
             {currentPhase.recommended.map((item) => (
               <span key={item} className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm">
@@ -379,7 +288,7 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
 
         {currentPhase.avoid.length > 0 && (
           <div className="border rounded-lg p-4">
-            <h4 className="font-medium text-red-700 mb-2">✗ Beperk of vermijd</h4>
+            <h4 className="font-medium text-red-700 mb-2">✗ {t.nutrition.avoid}</h4>
             <div className="flex flex-wrap gap-2">
               {currentPhase.avoid.map((item) => (
                 <span key={item} className="px-3 py-1 bg-red-50 text-red-700 rounded-full text-sm">
@@ -392,7 +301,7 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
 
         {/* Tips */}
         <div className="border rounded-lg p-4">
-          <h4 className="font-medium text-blue-700 mb-2">💡 Tips</h4>
+          <h4 className="font-medium text-blue-700 mb-2">💡 {t.nutrition.tips}</h4>
           <ul className="space-y-1">
             {currentPhase.tips.map((tip, index) => (
               <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
@@ -405,12 +314,12 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
 
         {/* Weekly Overview */}
         <div className="border rounded-lg p-4">
-          <h4 className="font-medium mb-3">Komende 7 dagen</h4>
+          <h4 className="font-medium mb-3">{t.nutrition.next7Days}</h4>
           <div className="space-y-2">
             {[0, 1, 2, 3, 4, 5, 6].map((offset) => {
               const futureDay = currentCycleDay + offset;
               const adjustedDay = futureDay > cycleLength ? futureDay - cycleLength : futureDay;
-              const phase = getNutritionPhase(adjustedDay, cycleLength);
+              const phase = getNutritionPhase(adjustedDay, cycleLength, t);
               const date = new Date();
               date.setDate(date.getDate() + offset);
 
@@ -418,7 +327,7 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
                 <div key={offset} className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
                     <span className="w-16 text-muted-foreground">
-                      {offset === 0 ? "Vandaag" : format(date, "EEE d", { locale: nl })}
+                      {offset === 0 ? t.common.today : format(date, "EEE d", { locale: dateLocale })}
                     </span>
                     <span>{phase.emoji}</span>
                     <span className={phase.color}>{phase.name}</span>
@@ -436,7 +345,7 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
   const renderFasesView = () => {
     return (
       <div className="space-y-4">
-        {allPhases.map(({ phase }, index) => {
+        {allPhases.map(({ phase }) => {
           const isCurrentPhase = currentPhase?.name === phase.name;
 
           return (
@@ -457,11 +366,11 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
                         {phase.name}
                         {isCurrentPhase && (
                           <span className="ml-2 text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
-                            Nu
+                            {t.phases.now}
                           </span>
                         )}
                       </h4>
-                      <p className="text-xs text-muted-foreground">Focus: {phase.focus}</p>
+                      <p className="text-xs text-muted-foreground">{t.nutrition.focus}: {phase.focus}</p>
                     </div>
                   </div>
                 </div>
@@ -472,7 +381,7 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
               <div className="p-4 space-y-3">
                 {/* Recommended */}
                 <div>
-                  <h5 className="text-sm font-medium text-green-700 mb-2">✓ Aanbevolen</h5>
+                  <h5 className="text-sm font-medium text-green-700 mb-2">✓ {t.exercise.recommended}</h5>
                   <div className="flex flex-wrap gap-1.5">
                     {phase.recommended.map((item) => (
                       <span key={item} className="px-2 py-0.5 bg-green-50 text-green-700 rounded-full text-xs">
@@ -485,7 +394,7 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
                 {/* Avoid */}
                 {phase.avoid.length > 0 && (
                   <div>
-                    <h5 className="text-sm font-medium text-red-700 mb-2">✗ Vermijd</h5>
+                    <h5 className="text-sm font-medium text-red-700 mb-2">✗ {t.exercise.avoid}</h5>
                     <div className="flex flex-wrap gap-1.5">
                       {phase.avoid.map((item) => (
                         <span key={item} className="px-2 py-0.5 bg-red-50 text-red-700 rounded-full text-xs">
@@ -498,7 +407,7 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
 
                 {/* Tips */}
                 <div>
-                  <h5 className="text-sm font-medium text-blue-700 mb-2">💡 Tips</h5>
+                  <h5 className="text-sm font-medium text-blue-700 mb-2">💡 {t.nutrition.tips}</h5>
                   <ul className="space-y-1">
                     {phase.tips.map((tip, tipIndex) => (
                       <li key={tipIndex} className="text-xs text-muted-foreground flex items-start gap-1.5">
@@ -520,8 +429,8 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
     if (recentNutrition.length === 0) {
       return (
         <div className="text-center py-6 text-muted-foreground">
-          <p>Nog geen voeding geregistreerd.</p>
-          <p className="text-sm mt-1">Klik op een dag om te beginnen.</p>
+          <p>{t.nutrition.noDataYet}</p>
+          <p className="text-sm mt-1">{t.nutrition.clickToStart}</p>
         </div>
       );
     }
@@ -539,7 +448,7 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
               className="w-full p-3 rounded-lg border hover:bg-muted/50 transition-colors text-left flex items-center justify-between"
             >
               <span className="font-medium text-sm">
-                {format(parseISO(symptom.date), "EEE d MMM", { locale: nl })}
+                {format(parseISO(symptom.date), "EEE d MMM", { locale: dateLocale })}
               </span>
               <span className={`inline-flex items-center gap-2 px-2 py-1 rounded-full text-sm ${nutrition.color}`}>
                 {nutrition.emoji} {nutrition.label}
@@ -562,7 +471,7 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
           <ChevronLeft className="h-4 w-4" />
         </Button>
         <span className="text-sm font-medium capitalize">
-          {format(currentMonth, "MMMM yyyy", { locale: nl })}
+          {format(currentMonth, "MMMM yyyy", { locale: dateLocale })}
         </span>
         <Button
           variant="ghost"
@@ -574,7 +483,7 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
       </div>
 
       <div className="grid grid-cols-7 gap-1">
-        {["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"].map((day) => (
+        {weekdays.map((day) => (
           <div key={day} className="text-center text-xs font-medium text-muted-foreground py-1">
             {day}
           </div>
@@ -632,7 +541,7 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
           )}
         >
           <span>📋</span>
-          <span>Plan</span>
+          <span>{t.nutrition.plan}</span>
         </button>
         <button
           onClick={() => setActiveTab("fases")}
@@ -644,7 +553,7 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
           )}
         >
           <span>🔄</span>
-          <span>Fases</span>
+          <span>{t.nutrition.phases}</span>
         </button>
         <button
           onClick={() => setActiveTab("recent")}
@@ -656,7 +565,7 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
           )}
         >
           <span>🍽️</span>
-          <span>Voeding</span>
+          <span>{t.nutrition.activity}</span>
         </button>
         <button
           onClick={() => setActiveTab("calendar")}
@@ -668,7 +577,7 @@ export function NutritionOverview({ symptoms, onDayClick, currentCycleDay, cycle
           )}
         >
           <span>📅</span>
-          <span>Kalender</span>
+          <span>{t.nutrition.calendar}</span>
         </button>
       </div>
 

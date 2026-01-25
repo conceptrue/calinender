@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,9 @@ import {
   FlaskConical,
   Calendar,
 } from "lucide-react";
+import { useTranslation } from "@/contexts/LanguageContext";
 import type { FertilityDay, CervicalMucus, OvulationTest } from "@/types";
+import type { Translations } from "@/i18n/types";
 
 interface FertilityDayDetailProps {
   dateString: string | null;
@@ -34,18 +36,22 @@ interface FertilityDayDetailProps {
   }) => void;
 }
 
-const MUCUS_OPTIONS: { value: CervicalMucus; label: string; description: string }[] = [
-  { value: "dry", label: "Droog", description: "Geen slijm voelbaar" },
-  { value: "sticky", label: "Plakkerig", description: "Dik, plakkerig slijm" },
-  { value: "creamy", label: "Crèmig", description: "Wit, lotionachtig" },
-  { value: "watery", label: "Waterig", description: "Helder en vloeibaar" },
-  { value: "eggwhite", label: "Eiwit", description: "Elastisch, helder (meest vruchtbaar)" },
-];
+function getMucusOptions(t: Translations): { value: CervicalMucus; label: string; description: string }[] {
+  return [
+    { value: "dry", label: t.fertility.dry, description: t.fertility.dryHelper },
+    { value: "sticky", label: t.fertility.sticky, description: t.fertility.stickyHelper },
+    { value: "creamy", label: t.fertility.creamy, description: t.fertility.creamyHelper },
+    { value: "watery", label: t.fertility.watery, description: t.fertility.wateryHelper },
+    { value: "eggwhite", label: t.fertility.eggwhite, description: t.fertility.eggwhiteHelper },
+  ];
+}
 
-const OVULATION_TEST_OPTIONS: { value: OvulationTest; label: string }[] = [
-  { value: "negative", label: "Negatief" },
-  { value: "positive", label: "Positief" },
-];
+function getOvulationTestOptions(t: Translations): { value: OvulationTest; label: string }[] {
+  return [
+    { value: "negative", label: t.fertility.negative },
+    { value: "positive", label: t.fertility.positive },
+  ];
+}
 
 export function FertilityDayDetail({
   dateString,
@@ -53,12 +59,16 @@ export function FertilityDayDetail({
   onClose,
   onUpdate,
 }: FertilityDayDetailProps) {
+  const { t, language } = useTranslation();
   const [temperature, setTemperature] = useState<string>("");
   const [cervicalMucus, setCervicalMucus] = useState<CervicalMucus>(null);
   const [ovulationTest, setOvulationTest] = useState<OvulationTest>(null);
   const [intercourse, setIntercourse] = useState(false);
   const [supplements, setSupplements] = useState(false);
   const [notes, setNotes] = useState("");
+
+  const mucusOptions = useMemo(() => getMucusOptions(t), [t]);
+  const ovulationTestOptions = useMemo(() => getOvulationTestOptions(t), [t]);
 
   useEffect(() => {
     if (fertilityData) {
@@ -93,7 +103,7 @@ export function FertilityDayDetail({
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString("nl-NL", {
+    return date.toLocaleDateString(language === "en" ? "en-US" : "nl-NL", {
       weekday: "long",
       day: "numeric",
       month: "long",
@@ -118,7 +128,7 @@ export function FertilityDayDetail({
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-medium">
               <ThermometerSun className="w-4 h-4 text-orange-500" />
-              Basale lichaamstemperatuur
+              {t.fertility.basalTemp}
             </label>
             <div className="flex items-center gap-2">
               <input
@@ -134,7 +144,7 @@ export function FertilityDayDetail({
               <span className="text-sm text-muted-foreground">°C</span>
             </div>
             <p className="text-xs text-muted-foreground">
-              Meet elke ochtend direct na het wakker worden
+              {t.fertility.basalTempHelper}
             </p>
           </div>
 
@@ -142,10 +152,10 @@ export function FertilityDayDetail({
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-medium">
               <Droplets className="w-4 h-4 text-blue-500" />
-              Cervixslijm
+              {t.fertility.cervicalMucus}
             </label>
             <div className="grid grid-cols-2 gap-2">
-              {MUCUS_OPTIONS.map((option) => (
+              {mucusOptions.map((option) => (
                 <button
                   key={option.value}
                   onClick={() =>
@@ -173,10 +183,10 @@ export function FertilityDayDetail({
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-medium">
               <FlaskConical className="w-4 h-4 text-green-600" />
-              Ovulatietest
+              {t.fertility.ovulationTest}
             </label>
             <div className="flex gap-2">
-              {OVULATION_TEST_OPTIONS.map((option) => (
+              {ovulationTestOptions.map((option) => (
                 <button
                   key={option.value}
                   onClick={() =>
@@ -217,7 +227,7 @@ export function FertilityDayDetail({
                   intercourse ? "text-red-500 fill-red-500" : "text-muted-foreground"
                 )}
               />
-              <span className="text-sm font-medium">Gemeenschap</span>
+              <span className="text-sm font-medium">{t.fertility.intercourse}</span>
             </button>
 
             {/* Supplements */}
@@ -236,17 +246,17 @@ export function FertilityDayDetail({
                   supplements ? "text-purple-500" : "text-muted-foreground"
                 )}
               />
-              <span className="text-sm font-medium">Supplementen</span>
+              <span className="text-sm font-medium">{t.fertility.supplements}</span>
             </button>
           </div>
 
           {/* Notes */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Notities</label>
+            <label className="text-sm font-medium">{t.dayDetail.notes}</label>
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Extra opmerkingen..."
+              placeholder={t.dayDetail.notesPlaceholder}
               rows={3}
             />
           </div>
@@ -255,7 +265,7 @@ export function FertilityDayDetail({
         {/* Save button */}
         <div className="flex justify-end pt-4 sticky bottom-0 bg-background pb-2 -mb-2">
           <Button onClick={handleSave} className="w-full sm:w-auto">
-            Opslaan
+            {t.common.save}
           </Button>
         </div>
       </DialogContent>

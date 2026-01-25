@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { Clock, Users, ChevronRight, X, Check } from "lucide-react";
+import { useTranslation } from "@/contexts/LanguageContext";
+import type { Translations } from "@/i18n/types";
 
 interface Recipe {
   name: string;
@@ -31,10 +33,10 @@ interface RecipesViewProps {
   cycleLength: number;
 }
 
-function getAllPhaseRecipes(cycleLength: number): Phase[] {
+function getAllPhaseRecipes(cycleLength: number, t: Translations): Phase[] {
   return [
     {
-      name: "Menstruatie",
+      name: t.phases.menstruation,
       emoji: "🌙",
       color: "text-red-700",
       bgColor: "bg-red-50",
@@ -151,7 +153,7 @@ function getAllPhaseRecipes(cycleLength: number): Phase[] {
       ],
     },
     {
-      name: "Folliculaire fase",
+      name: t.phases.follicular,
       emoji: "🌱",
       color: "text-green-700",
       bgColor: "bg-green-50",
@@ -272,7 +274,7 @@ function getAllPhaseRecipes(cycleLength: number): Phase[] {
       ],
     },
     {
-      name: "Ovulatie",
+      name: t.phases.ovulation,
       emoji: "☀️",
       color: "text-yellow-700",
       bgColor: "bg-yellow-50",
@@ -391,7 +393,7 @@ function getAllPhaseRecipes(cycleLength: number): Phase[] {
       ],
     },
     {
-      name: "Vroege luteale fase",
+      name: t.phases.earlyLuteal,
       emoji: "🍂",
       color: "text-orange-700",
       bgColor: "bg-orange-50",
@@ -516,7 +518,7 @@ function getAllPhaseRecipes(cycleLength: number): Phase[] {
       ],
     },
     {
-      name: "Late luteale fase",
+      name: t.phases.lateLuteal,
       emoji: "🌧️",
       color: "text-purple-700",
       bgColor: "bg-purple-50",
@@ -660,27 +662,28 @@ function getAllPhaseRecipes(cycleLength: number): Phase[] {
   ];
 }
 
-function getCurrentPhaseName(cycleDay: number, cycleLength: number): string {
+function getCurrentPhaseName(cycleDay: number, cycleLength: number, t: Translations): string {
   const ovulationDay = Math.round(cycleLength / 2);
 
-  if (cycleDay <= 5) return "Menstruatie";
-  if (cycleDay <= ovulationDay - 2) return "Folliculaire fase";
-  if (cycleDay <= ovulationDay + 2) return "Ovulatie";
-  if (cycleDay <= ovulationDay + 7) return "Vroege luteale fase";
-  return "Late luteale fase";
+  if (cycleDay <= 5) return t.phases.menstruation;
+  if (cycleDay <= ovulationDay - 2) return t.phases.follicular;
+  if (cycleDay <= ovulationDay + 2) return t.phases.ovulation;
+  if (cycleDay <= ovulationDay + 7) return t.phases.earlyLuteal;
+  return t.phases.lateLuteal;
 }
 
 export function RecipesView({ currentCycleDay, cycleLength }: RecipesViewProps) {
+  const { t } = useTranslation();
   const [selectedPhase, setSelectedPhase] = useState<string | null>(null);
   const [selectedRecipe, setSelectedRecipe] = useState<{ recipe: Recipe; phase: Phase } | null>(null);
   const [checkedSteps, setCheckedSteps] = useState<Set<number>>(new Set());
 
-  const allPhases = useMemo(() => getAllPhaseRecipes(cycleLength), [cycleLength]);
+  const allPhases = useMemo(() => getAllPhaseRecipes(cycleLength, t), [cycleLength, t]);
 
   const currentPhaseName = useMemo(() => {
     if (!currentCycleDay) return null;
-    return getCurrentPhaseName(currentCycleDay, cycleLength);
-  }, [currentCycleDay, cycleLength]);
+    return getCurrentPhaseName(currentCycleDay, cycleLength, t);
+  }, [currentCycleDay, cycleLength, t]);
 
   const filteredPhases = selectedPhase
     ? allPhases.filter(p => p.name === selectedPhase)
@@ -709,8 +712,8 @@ export function RecipesView({ currentCycleDay, cycleLength }: RecipesViewProps) 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Recepten</h1>
-        <p className="text-muted-foreground">Recepten afgestemd op elke fase van je cyclus</p>
+        <h1 className="text-2xl font-semibold">{t.recipes.title}</h1>
+        <p className="text-muted-foreground">{t.nav.recipes}</p>
       </div>
 
       {/* Phase Filter */}
@@ -726,7 +729,7 @@ export function RecipesView({ currentCycleDay, cycleLength }: RecipesViewProps) 
                   : "bg-muted hover:bg-muted/80"
               )}
             >
-              Alle fases
+              {t.phases.allPhases}
             </button>
             {allPhases.map((phase) => (
               <button
@@ -742,7 +745,7 @@ export function RecipesView({ currentCycleDay, cycleLength }: RecipesViewProps) 
                 <span>{phase.emoji}</span>
                 <span>{phase.name}</span>
                 {currentPhaseName === phase.name && (
-                  <span className="ml-1 text-xs bg-white/30 px-1.5 py-0.5 rounded">Nu</span>
+                  <span className="ml-1 text-xs bg-white/30 px-1.5 py-0.5 rounded">{t.phases.now}</span>
                 )}
               </button>
             ))}
@@ -759,7 +762,7 @@ export function RecipesView({ currentCycleDay, cycleLength }: RecipesViewProps) 
               {phase.name}
               {currentPhaseName === phase.name && (
                 <span className="ml-2 text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
-                  Huidige fase
+                  {t.phases.currentPhase}
                 </span>
               )}
             </h2>
@@ -793,12 +796,12 @@ export function RecipesView({ currentCycleDay, cycleLength }: RecipesViewProps) 
                     </div>
                     <div className="flex items-center gap-1">
                       <Users className="w-4 h-4" />
-                      <span>{recipe.servings} pers.</span>
+                      <span>{recipe.servings} {t.common.persons}</span>
                     </div>
                   </div>
 
                   <div>
-                    <h4 className="text-xs font-medium text-muted-foreground mb-2">Ingrediënten</h4>
+                    <h4 className="text-xs font-medium text-muted-foreground mb-2">{t.recipes.ingredients}</h4>
                     <div className="flex flex-wrap gap-1.5">
                       {recipe.ingredients.slice(0, 4).map((ingredient, i) => (
                         <span
@@ -824,7 +827,7 @@ export function RecipesView({ currentCycleDay, cycleLength }: RecipesViewProps) 
                       handleOpenRecipe(recipe, phase);
                     }}
                   >
-                    Recept openen
+                    {t.recipes.openRecipe}
                   </Button>
                 </CardContent>
               </Card>
@@ -858,7 +861,7 @@ export function RecipesView({ currentCycleDay, cycleLength }: RecipesViewProps) 
                   </div>
                   <div className={`flex items-center gap-1.5 ${selectedRecipe.phase.color}`}>
                     <Users className="w-4 h-4" />
-                    <span>{selectedRecipe.recipe.servings} personen</span>
+                    <span>{selectedRecipe.recipe.servings} {t.common.persons}</span>
                   </div>
                   <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs ${selectedRecipe.phase.bgColor} ${selectedRecipe.phase.color} border`}>
                     <span>{selectedRecipe.phase.emoji}</span>
@@ -870,7 +873,7 @@ export function RecipesView({ currentCycleDay, cycleLength }: RecipesViewProps) 
               <div className="space-y-6 pt-4">
                 {/* Ingredients */}
                 <div>
-                  <h3 className="font-semibold mb-3">Ingrediënten</h3>
+                  <h3 className="font-semibold mb-3">{t.recipes.ingredients}</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {selectedRecipe.recipe.ingredients.map((ingredient, i) => (
                       <div
@@ -885,7 +888,7 @@ export function RecipesView({ currentCycleDay, cycleLength }: RecipesViewProps) 
 
                 {/* Steps */}
                 <div>
-                  <h3 className="font-semibold mb-3">Bereidingswijze</h3>
+                  <h3 className="font-semibold mb-3">{t.recipes.instructions}</h3>
                   <div className="space-y-2">
                     {selectedRecipe.recipe.steps.map((step, i) => (
                       <button
@@ -921,7 +924,7 @@ export function RecipesView({ currentCycleDay, cycleLength }: RecipesViewProps) 
                 {selectedRecipe.recipe.tip && (
                   <div className={`${selectedRecipe.phase.bgColor} rounded-lg p-4`}>
                     <p className={`text-sm ${selectedRecipe.phase.color}`}>
-                      <span className="font-semibold">💡 Tip: </span>
+                      <span className="font-semibold">💡 {t.recipes.tips}: </span>
                       {selectedRecipe.recipe.tip}
                     </p>
                   </div>
@@ -930,11 +933,11 @@ export function RecipesView({ currentCycleDay, cycleLength }: RecipesViewProps) 
                 {/* Progress */}
                 <div className="flex items-center justify-between pt-4 border-t">
                   <span className="text-sm text-muted-foreground">
-                    {checkedSteps.size} van {selectedRecipe.recipe.steps.length} stappen voltooid
+                    {checkedSteps.size} {t.common.of} {selectedRecipe.recipe.steps.length} {t.recipes.stepsCompleted}
                   </span>
                   {checkedSteps.size === selectedRecipe.recipe.steps.length && (
                     <span className="text-sm text-green-600 font-medium">
-                      ✓ Recept voltooid!
+                      ✓ {t.recipes.recipeCompleted}
                     </span>
                   )}
                 </div>

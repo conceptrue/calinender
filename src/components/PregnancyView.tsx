@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { FertilityCalendar } from "@/components/FertilityCalendar";
 import { FertilityOverview } from "@/components/FertilityOverview";
 import { FertilityDayDetail } from "@/components/FertilityDayDetail";
+import { useTranslation } from "@/contexts/LanguageContext";
 import {
   Baby,
   Calendar,
@@ -23,6 +25,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import type { FertilityDay, Period, CervicalMucus, OvulationTest } from "@/types";
+import type { Translations } from "@/i18n/types";
 
 interface PregnancyViewProps {
   currentCycleDay: number | null;
@@ -52,137 +55,133 @@ interface FertilityTip {
 interface NutrientInfo {
   name: string;
   benefit: string;
-  sources: string[];
   icon: React.ComponentType<{ className?: string }>;
 }
 
 interface ExerciseInfo {
   name: string;
   benefit: string;
-  frequency: string;
   icon: React.ComponentType<{ className?: string }>;
 }
 
-const fertilityTips: FertilityTip[] = [
-  {
-    icon: Calendar,
-    title: "Ken je vruchtbare dagen",
-    description:
-      "Je bent het meest vruchtbaar rond de ovulatie (dag 12-16 van een 28-daagse cyclus). De eicel leeft 12-24 uur, zaadcellen tot 5 dagen.",
-  },
-  {
-    icon: ThermometerSun,
-    title: "Meet je basale lichaamstemperatuur",
-    description:
-      "Na de ovulatie stijgt je temperatuur met 0.2-0.5°C. Meet elke ochtend voor het opstaan om je ovulatie te voorspellen.",
-  },
-  {
-    icon: Droplets,
-    title: "Let op cervixslijm",
-    description:
-      "Rond de ovulatie wordt het slijm helder, elastisch en lijkt op rauw eiwit. Dit is je meest vruchtbare periode.",
-  },
-  {
-    icon: Clock,
-    title: "Timing is belangrijk",
-    description:
-      "Heb regelmatig gemeenschap (elke 2-3 dagen) tijdens je vruchtbare venster, vooral de 2-3 dagen vóór de ovulatie.",
-  },
-  {
-    icon: Moon,
-    title: "Prioriteer slaap",
-    description:
-      "7-9 uur slaap per nacht ondersteunt hormoonbalans en vruchtbaarheid. Vermijd schermtijd voor het slapen.",
-  },
-  {
-    icon: Heart,
-    title: "Verminder stress",
-    description:
-      "Chronische stress kan de ovulatie verstoren. Probeer yoga, meditatie of ademhalingsoefeningen.",
-  },
-];
+interface AvoidItem {
+  name: string;
+  description: string;
+}
 
-const nutrients: NutrientInfo[] = [
-  {
-    name: "Foliumzuur",
-    benefit: "Essentieel voor de ontwikkeling van de neurale buis. Start minimaal 1 maand voor conceptie.",
-    sources: ["Donkergroene bladgroenten", "Linzen", "Asperges", "Broccoli", "Sinaasappels"],
-    icon: Leaf,
-  },
-  {
-    name: "IJzer",
-    benefit: "Ondersteunt de bloedaanmaak en voorkomt bloedarmoede tijdens zwangerschap.",
-    sources: ["Rood vlees", "Spinazie", "Kikkererwten", "Pompoenpitten", "Quinoa"],
-    icon: Droplets,
-  },
-  {
-    name: "Omega-3 vetzuren",
-    benefit: "Belangrijk voor de hersenontwikkeling van de baby en hormoonbalans.",
-    sources: ["Vette vis (zalm, makreel)", "Walnoten", "Chiazaad", "Lijnzaad"],
-    icon: Fish,
-  },
-  {
-    name: "Vitamine D",
-    benefit: "Ondersteunt de hormoonproductie en immuunsysteem.",
-    sources: ["Zonlicht", "Vette vis", "Eieren", "Verrijkte zuivel"],
-    icon: ThermometerSun,
-  },
-  {
-    name: "Zink",
-    benefit: "Cruciaal voor eicelkwaliteit en hormoonregulatie.",
-    sources: ["Oesters", "Rundvlees", "Pompoenpitten", "Cashewnoten", "Kikkererwten"],
-    icon: Egg,
-  },
-  {
-    name: "Vitamine B12",
-    benefit: "Belangrijk voor DNA-synthese en zenuwstelsel.",
-    sources: ["Vlees", "Vis", "Eieren", "Zuivelproducten"],
-    icon: Pill,
-  },
-];
+function getFertilityTips(t: Translations): FertilityTip[] {
+  return [
+    {
+      icon: Calendar,
+      title: t.pregnancy.knowFertileDays,
+      description: t.pregnancy.knowFertileDaysDesc,
+    },
+    {
+      icon: ThermometerSun,
+      title: t.pregnancy.measureTemp,
+      description: t.pregnancy.measureTempDesc,
+    },
+    {
+      icon: Droplets,
+      title: t.pregnancy.watchMucus,
+      description: t.pregnancy.watchMucusDesc,
+    },
+    {
+      icon: Clock,
+      title: t.pregnancy.timingMatters,
+      description: t.pregnancy.timingMattersDesc,
+    },
+    {
+      icon: Moon,
+      title: t.pregnancy.prioritizeSleep,
+      description: t.pregnancy.prioritizeSleepDesc,
+    },
+    {
+      icon: Heart,
+      title: t.pregnancy.avoidStress,
+      description: t.pregnancy.avoidStressDesc,
+    },
+  ];
+}
 
-const exercises: ExerciseInfo[] = [
-  {
-    name: "Wandelen",
-    benefit: "Verbetert de bloedcirculatie naar de baarmoeder zonder overbelasting.",
-    frequency: "30 minuten, 5x per week",
-    icon: Dumbbell,
-  },
-  {
-    name: "Yoga",
-    benefit: "Vermindert stress, verbetert flexibiliteit en ondersteunt hormoonbalans.",
-    frequency: "2-3x per week",
-    icon: Heart,
-  },
-  {
-    name: "Zwemmen",
-    benefit: "Laag-impact cardio die het hele lichaam traint zonder gewrichten te belasten.",
-    frequency: "2-3x per week",
-    icon: Droplets,
-  },
-  {
-    name: "Lichte krachttraining",
-    benefit: "Verbetert insulinegevoeligheid en hormoonbalans.",
-    frequency: "2x per week, matige gewichten",
-    icon: Dumbbell,
-  },
-  {
-    name: "Pilates",
-    benefit: "Versterkt de core en bekkenbodemspieren.",
-    frequency: "2-3x per week",
-    icon: Heart,
-  },
-];
+function getNutrients(t: Translations): NutrientInfo[] {
+  return [
+    {
+      name: t.pregnancy.folicAcid,
+      benefit: t.pregnancy.folicAcidDesc,
+      icon: Leaf,
+    },
+    {
+      name: t.pregnancy.iron,
+      benefit: t.pregnancy.ironDesc,
+      icon: Droplets,
+    },
+    {
+      name: t.pregnancy.omega3,
+      benefit: t.pregnancy.omega3Desc,
+      icon: Fish,
+    },
+    {
+      name: t.pregnancy.vitaminD,
+      benefit: t.pregnancy.vitaminDDesc,
+      icon: ThermometerSun,
+    },
+    {
+      name: t.pregnancy.zinc,
+      benefit: t.pregnancy.zincDesc,
+      icon: Egg,
+    },
+    {
+      name: t.pregnancy.vitaminB12,
+      benefit: t.pregnancy.vitaminB12Desc,
+      icon: Pill,
+    },
+  ];
+}
 
-const avoidList = [
-  "Alcohol - vermindert vruchtbaarheid bij beide partners",
-  "Roken - schaadt eicel- en zaadcelkwaliteit",
-  "Overmatig cafeïne - max 200mg per dag (2 kopjes koffie)",
-  "Intensieve sport - kan de ovulatie verstoren",
-  "Transvetten - negatief effect op ovulatie",
-  "Bewerkte voeding - verstoort hormoonbalans",
-  "Stress - kan de menstruatiecyclus beïnvloeden",
-];
+function getExercises(t: Translations): ExerciseInfo[] {
+  return [
+    {
+      name: t.exercise.walking,
+      benefit: t.pregnancy.walkingDesc,
+      icon: Dumbbell,
+    },
+    {
+      name: t.exercise.yoga,
+      benefit: t.pregnancy.yogaDesc,
+      icon: Heart,
+    },
+    {
+      name: t.exercise.swimming,
+      benefit: t.pregnancy.swimmingDesc,
+      icon: Droplets,
+    },
+    {
+      name: t.pregnancy.lightWeights,
+      benefit: t.pregnancy.lightWeightsDesc,
+      icon: Dumbbell,
+    },
+    {
+      name: t.pregnancy.pilates,
+      benefit: t.pregnancy.pilatesDesc,
+      icon: Heart,
+    },
+  ];
+}
+
+function getAvoidList(t: Translations): AvoidItem[] {
+  return [
+    { name: t.pregnancy.alcohol, description: t.pregnancy.alcoholDesc },
+    { name: t.pregnancy.smoking, description: t.pregnancy.smokingDesc },
+    { name: t.pregnancy.caffeine, description: t.pregnancy.caffeineDesc },
+    { name: t.pregnancy.heavyExercise, description: t.pregnancy.heavyExerciseDesc },
+    { name: t.pregnancy.rawFish, description: t.pregnancy.rawFishDesc },
+    { name: t.pregnancy.stress, description: t.pregnancy.stressDesc },
+    { name: t.pregnancy.chemicals, description: t.pregnancy.chemicalsDesc },
+  ];
+}
+
+type TabType = "calendar" | "tips" | "nutrition" | "exercise" | "avoid" | "supplements";
 
 export function PregnancyView({
   currentCycleDay,
@@ -192,7 +191,14 @@ export function PregnancyView({
   getFertilityForDate,
   updateFertility,
 }: PregnancyViewProps) {
+  const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<TabType>("calendar");
+
+  const fertilityTips = useMemo(() => getFertilityTips(t), [t]);
+  const nutrients = useMemo(() => getNutrients(t), [t]);
+  const exercises = useMemo(() => getExercises(t), [t]);
+  const avoidList = useMemo(() => getAvoidList(t), [t]);
 
   const getFertileWindow = () => {
     const ovulationDay = Math.round(cycleLength - 14);
@@ -232,41 +238,120 @@ export function PregnancyView({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="mb-6">
+      <div>
         <h1 className="text-2xl font-semibold flex items-center gap-2">
           <Baby className="w-7 h-7 text-pink-500" />
-          Zwanger worden
+          {t.pregnancy.title}
         </h1>
         <p className="text-muted-foreground">
-          Tips en advies voor een gezonde conceptie
+          {t.pregnancy.subtitle}
         </p>
       </div>
 
-      {/* Fertility Status Card */}
-      <Card className="border-pink-200 bg-gradient-to-br from-pink-50 to-rose-50">
+      {/* Tabs */}
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => setActiveTab("calendar")}
+          className={cn(
+            "px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2",
+            activeTab === "calendar"
+              ? "bg-primary text-primary-foreground"
+              : "bg-pink-50 text-pink-700 hover:opacity-80"
+          )}
+        >
+          <span>📅</span>
+          <span>{t.nav.calendar}</span>
+        </button>
+        <button
+          onClick={() => setActiveTab("tips")}
+          className={cn(
+            "px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2",
+            activeTab === "tips"
+              ? "bg-primary text-primary-foreground"
+              : "bg-rose-50 text-rose-700 hover:opacity-80"
+          )}
+        >
+          <span>💡</span>
+          <span>{t.pregnancy.tips}</span>
+        </button>
+        <button
+          onClick={() => setActiveTab("nutrition")}
+          className={cn(
+            "px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2",
+            activeTab === "nutrition"
+              ? "bg-primary text-primary-foreground"
+              : "bg-green-50 text-green-700 hover:opacity-80"
+          )}
+        >
+          <span>🥗</span>
+          <span>{t.nav.nutrition}</span>
+        </button>
+        <button
+          onClick={() => setActiveTab("exercise")}
+          className={cn(
+            "px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2",
+            activeTab === "exercise"
+              ? "bg-primary text-primary-foreground"
+              : "bg-blue-50 text-blue-700 hover:opacity-80"
+          )}
+        >
+          <span>🏃</span>
+          <span>{t.nav.exercise}</span>
+        </button>
+        <button
+          onClick={() => setActiveTab("avoid")}
+          className={cn(
+            "px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2",
+            activeTab === "avoid"
+              ? "bg-primary text-primary-foreground"
+              : "bg-amber-50 text-amber-700 hover:opacity-80"
+          )}
+        >
+          <span>⚠️</span>
+          <span>{t.pregnancy.avoidTitle}</span>
+        </button>
+        <button
+          onClick={() => setActiveTab("supplements")}
+          className={cn(
+            "px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2",
+            activeTab === "supplements"
+              ? "bg-primary text-primary-foreground"
+              : "bg-purple-50 text-purple-700 hover:opacity-80"
+          )}
+        >
+          <span>💊</span>
+          <span>{t.pregnancy.supplementsTitle}</span>
+        </button>
+      </div>
+
+      {/* Calendar Tab Content */}
+      {activeTab === "calendar" && (
+        <>
+          {/* Fertility Status Card */}
+          <Card className="border-pink-200 bg-gradient-to-br from-pink-50 to-rose-50">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="w-5 h-5 text-pink-500" />
-            Jouw vruchtbare venster
+            {t.pregnancy.fertileWindow}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center p-4 bg-white rounded-lg shadow-sm">
-              <p className="text-sm text-muted-foreground mb-1">Huidige cyclusdag</p>
+              <p className="text-sm text-muted-foreground mb-1">{t.pregnancy.currentCycleDay}</p>
               <p className="text-3xl font-bold text-pink-600">
                 {currentCycleDay ?? "—"}
               </p>
             </div>
             <div className="text-center p-4 bg-white rounded-lg shadow-sm">
-              <p className="text-sm text-muted-foreground mb-1">Vruchtbare dagen</p>
+              <p className="text-sm text-muted-foreground mb-1">{t.pregnancy.fertileDays}</p>
               <p className="text-3xl font-bold text-green-600">
                 {fertileStart} - {fertileEnd}
               </p>
             </div>
             <div className="text-center p-4 bg-white rounded-lg shadow-sm">
-              <p className="text-sm text-muted-foreground mb-1">Ovulatie (geschat)</p>
-              <p className="text-3xl font-bold text-purple-600">Dag {ovulationDay}</p>
+              <p className="text-sm text-muted-foreground mb-1">{t.pregnancy.estimatedOvulation}</p>
+              <p className="text-3xl font-bold text-purple-600">{t.cycle.cycleDay} {ovulationDay}</p>
             </div>
           </div>
 
@@ -274,19 +359,19 @@ export function PregnancyView({
             <div className="mt-4">
               {isOvulationDay ? (
                 <Badge className="bg-purple-500 text-white text-sm px-4 py-2">
-                  Vandaag is je geschatte ovulatiedag - maximale vruchtbaarheid!
+                  {t.pregnancy.maxFertility}
                 </Badge>
               ) : isInFertileWindow ? (
                 <Badge className="bg-green-500 text-white text-sm px-4 py-2">
-                  Je bent in je vruchtbare venster - goede kans op conceptie
+                  {t.pregnancy.fertileWindow}
                 </Badge>
               ) : currentCycleDay < fertileStart ? (
                 <Badge variant="secondary" className="text-sm px-4 py-2">
-                  Je vruchtbare venster begint over {fertileStart - currentCycleDay} dagen
+                  {fertileStart - currentCycleDay} {t.common.days}
                 </Badge>
               ) : (
                 <Badge variant="secondary" className="text-sm px-4 py-2">
-                  Je vruchtbare venster is voorbij - volgende cyclus proberen
+                  {t.cycle.nextPeriod}
                 </Badge>
               )}
             </div>
@@ -301,7 +386,7 @@ export function PregnancyView({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="w-5 h-5 text-pink-500" />
-              Vruchtbaarheid bijhouden
+              {t.pregnancy.trackFertility}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -320,7 +405,7 @@ export function PregnancyView({
         {/* Overview */}
         <Card>
           <CardHeader>
-            <CardTitle>Overzicht</CardTitle>
+            <CardTitle>{t.pregnancy.overview}</CardTitle>
           </CardHeader>
           <CardContent>
             <FertilityOverview
@@ -330,13 +415,16 @@ export function PregnancyView({
           </CardContent>
         </Card>
       </div>
+        </>
+      )}
 
-      {/* Tips - compact grid */}
+      {/* Tips Tab Content */}
+      {activeTab === "tips" && (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Heart className="w-5 h-5 text-rose-500" />
-            Tips voor optimale vruchtbaarheid
+            {t.pregnancy.optimalTips}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -357,15 +445,15 @@ export function PregnancyView({
           </div>
         </CardContent>
       </Card>
+      )}
 
-      {/* Voeding + Beweging naast elkaar */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Nutrition Section */}
-        <Card>
+      {/* Nutrition Tab Content */}
+      {activeTab === "nutrition" && (
+      <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Apple className="w-5 h-5 text-green-500" />
-              Voeding
+              {t.nav.nutrition}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -387,14 +475,16 @@ export function PregnancyView({
               })}
             </div>
           </CardContent>
-        </Card>
+      </Card>
+      )}
 
-        {/* Exercise Section */}
-        <Card>
+      {/* Exercise Tab Content */}
+      {activeTab === "exercise" && (
+      <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Dumbbell className="w-5 h-5 text-blue-500" />
-              Beweging
+              {t.nav.exercise}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -406,31 +496,26 @@ export function PregnancyView({
                     key={index}
                     className="p-3 rounded-lg border bg-gradient-to-br from-blue-50 to-indigo-50"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Icon className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                        <h3 className="font-medium text-sm text-blue-800">{exercise.name}</h3>
-                      </div>
-                      <Badge className="bg-blue-100 text-blue-800 text-xs">
-                        {exercise.frequency}
-                      </Badge>
+                    <div className="flex items-center gap-2">
+                      <Icon className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                      <h3 className="font-medium text-sm text-blue-800">{exercise.name}</h3>
                     </div>
+                    <p className="text-xs text-muted-foreground mt-1">{exercise.benefit}</p>
                   </div>
                 );
               })}
             </div>
           </CardContent>
-        </Card>
-      </div>
+      </Card>
+      )}
 
-      {/* Vermijden + Supplementen naast elkaar */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* What to Avoid */}
-        <Card className="border-amber-200">
+      {/* Avoid Tab Content */}
+      {activeTab === "avoid" && (
+      <Card className="border-amber-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-amber-700">
               <AlertCircle className="w-5 h-5" />
-              Vermijden
+              {t.pregnancy.avoidTitle}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -438,44 +523,45 @@ export function PregnancyView({
               {avoidList.map((item, index) => (
                 <li key={index} className="flex items-start gap-2 text-sm">
                   <span className="text-amber-500 mt-0.5">•</span>
-                  <span className="text-muted-foreground">{item}</span>
+                  <span className="text-muted-foreground">{item.name} - {item.description}</span>
                 </li>
               ))}
             </ul>
           </CardContent>
-        </Card>
+      </Card>
+      )}
 
-        {/* Supplements Card */}
-        <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-violet-50">
+      {/* Supplements Tab Content */}
+      {activeTab === "supplements" && (
+      <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-violet-50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-purple-700">
               <Pill className="w-5 h-5" />
-              Supplementen
+              {t.pregnancy.supplementsTitle}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div className="p-2 bg-white rounded-lg">
-                <h3 className="font-medium text-sm text-purple-800">Foliumzuur</h3>
-                <p className="text-xs text-muted-foreground">400-800 mcg/dag, 1 maand vóór conceptie</p>
+                <h3 className="font-medium text-sm text-purple-800">{t.pregnancy.folicAcid}</h3>
+                <p className="text-xs text-muted-foreground">{t.pregnancy.folicAcidDesc}</p>
               </div>
               <div className="p-2 bg-white rounded-lg">
-                <h3 className="font-medium text-sm text-purple-800">Vitamine D</h3>
-                <p className="text-xs text-muted-foreground">10-25 mcg/dag</p>
+                <h3 className="font-medium text-sm text-purple-800">{t.pregnancy.vitaminD}</h3>
+                <p className="text-xs text-muted-foreground">{t.pregnancy.vitaminDDesc}</p>
               </div>
               <div className="p-2 bg-white rounded-lg">
-                <h3 className="font-medium text-sm text-purple-800">Omega-3</h3>
-                <p className="text-xs text-muted-foreground">250-500 mg DHA/dag</p>
+                <h3 className="font-medium text-sm text-purple-800">{t.pregnancy.omega3}</h3>
+                <p className="text-xs text-muted-foreground">{t.pregnancy.omega3Desc}</p>
               </div>
               <div className="p-2 bg-white rounded-lg">
-                <h3 className="font-medium text-sm text-purple-800">Prenatale multivitamine</h3>
-                <p className="text-xs text-muted-foreground">Complete aanvulling</p>
+                <h3 className="font-medium text-sm text-purple-800">{t.pregnancy.vitaminB12}</h3>
+                <p className="text-xs text-muted-foreground">{t.pregnancy.vitaminB12Desc}</p>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground mt-3">* Raadpleeg je arts</p>
           </CardContent>
-        </Card>
-      </div>
+      </Card>
+      )}
 
       {/* Fertility Day Detail Dialog */}
       <FertilityDayDetail

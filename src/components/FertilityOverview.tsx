@@ -2,11 +2,13 @@
 
 import { useState, useMemo } from "react";
 import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, subMonths, addMonths } from "date-fns";
-import { nl } from "date-fns/locale";
+import { nl, enUS } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, ThermometerSun, Droplets, Heart, Pill, FlaskConical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/contexts/LanguageContext";
 import type { FertilityDay } from "@/types";
+import type { Translations } from "@/i18n/types";
 
 type ViewType = "recent" | "temp" | "mucus" | "tests" | "activity";
 
@@ -15,25 +17,34 @@ interface FertilityOverviewProps {
   onDayClick: (dateString: string) => void;
 }
 
-const tabs: { value: ViewType; label: string }[] = [
-  { value: "recent", label: "Recent" },
-  { value: "temp", label: "Temp" },
-  { value: "mucus", label: "Slijm" },
-  { value: "tests", label: "Tests" },
-  { value: "activity", label: "Activiteit" },
-];
+function getTabs(t: Translations): { value: ViewType; label: string }[] {
+  return [
+    { value: "recent", label: t.symptoms.recent },
+    { value: "temp", label: t.fertility.temp },
+    { value: "mucus", label: t.fertility.mucus },
+    { value: "tests", label: t.fertility.tests },
+    { value: "activity", label: t.fertility.activity },
+  ];
+}
 
-const mucusConfig: Record<string, { label: string; color: string; short: string }> = {
-  dry: { label: "Droog", color: "bg-gray-100 text-gray-800", short: "D" },
-  sticky: { label: "Plakkerig", color: "bg-yellow-100 text-yellow-800", short: "P" },
-  creamy: { label: "Crèmig", color: "bg-orange-100 text-orange-800", short: "C" },
-  watery: { label: "Waterig", color: "bg-blue-100 text-blue-800", short: "W" },
-  eggwhite: { label: "Eiwit", color: "bg-green-100 text-green-800", short: "E" },
-};
+function getMucusConfig(t: Translations): Record<string, { label: string; color: string; short: string }> {
+  return {
+    dry: { label: t.fertility.dry, color: "bg-gray-100 text-gray-800", short: "D" },
+    sticky: { label: t.fertility.sticky, color: "bg-yellow-100 text-yellow-800", short: "S" },
+    creamy: { label: t.fertility.creamy, color: "bg-orange-100 text-orange-800", short: "C" },
+    watery: { label: t.fertility.watery, color: "bg-blue-100 text-blue-800", short: "W" },
+    eggwhite: { label: t.fertility.eggwhite, color: "bg-green-100 text-green-800", short: "E" },
+  };
+}
 
 export function FertilityOverview({ fertility, onDayClick }: FertilityOverviewProps) {
+  const { t, language } = useTranslation();
   const [activeTab, setActiveTab] = useState<ViewType>("recent");
   const [currentMonth, setCurrentMonth] = useState(new Date());
+
+  const dateLocale = language === "en" ? enUS : nl;
+  const tabs = useMemo(() => getTabs(t), [t]);
+  const mucusConfig = useMemo(() => getMucusConfig(t), [t]);
 
   const fertilityByDate = useMemo(() => {
     const map = new Map<string, FertilityDay>();
@@ -70,7 +81,7 @@ export function FertilityOverview({ fertility, onDayClick }: FertilityOverviewPr
         <ChevronLeft className="h-4 w-4" />
       </Button>
       <span className="text-sm font-medium capitalize">
-        {format(currentMonth, "MMMM yyyy", { locale: nl })}
+        {format(currentMonth, "MMMM yyyy", { locale: dateLocale })}
       </span>
       <Button
         variant="ghost"
@@ -82,9 +93,14 @@ export function FertilityOverview({ fertility, onDayClick }: FertilityOverviewPr
     </div>
   );
 
+  const weekdays = useMemo(() => [
+    t.weekdaysShort.mon, t.weekdaysShort.tue, t.weekdaysShort.wed,
+    t.weekdaysShort.thu, t.weekdaysShort.fri, t.weekdaysShort.sat, t.weekdaysShort.sun
+  ], [t]);
+
   const renderCalendarGrid = (renderCell: (dateString: string) => React.ReactNode) => (
     <div className="grid grid-cols-7 gap-1">
-      {["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"].map((day) => (
+      {weekdays.map((day) => (
         <div key={day} className="text-center text-xs font-medium text-muted-foreground py-1">
           {day}
         </div>
@@ -114,8 +130,8 @@ export function FertilityOverview({ fertility, onDayClick }: FertilityOverviewPr
     if (recentFertility.length === 0) {
       return (
         <div className="text-center py-8 text-muted-foreground">
-          <p>Nog geen data geregistreerd.</p>
-          <p className="text-sm mt-1">Klik op een dag in de kalender om te beginnen.</p>
+          <p>{t.fertility.noDataYet}</p>
+          <p className="text-sm mt-1">{t.fertility.clickToStart}</p>
         </div>
       );
     }
@@ -130,7 +146,7 @@ export function FertilityOverview({ fertility, onDayClick }: FertilityOverviewPr
           >
             <div className="flex items-center justify-between">
               <span className="font-medium text-sm">
-                {format(parseISO(f.date), "EEE d MMM", { locale: nl })}
+                {format(parseISO(f.date), "EEE d MMM", { locale: dateLocale })}
               </span>
               <div className="flex items-center gap-2">
                 {f.temperature && (
@@ -184,11 +200,11 @@ export function FertilityOverview({ fertility, onDayClick }: FertilityOverviewPr
       <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t text-xs">
         <span className="flex items-center gap-1">
           <div className="w-3 h-3 rounded bg-blue-100" />
-          &lt; 36.5°C
+          {t.fertility.belowTemp}
         </span>
         <span className="flex items-center gap-1">
           <div className="w-3 h-3 rounded bg-orange-100" />
-          ≥ 36.5°C (post-ovulatie)
+          {t.fertility.aboveTemp}
         </span>
       </div>
     </>
@@ -238,10 +254,10 @@ export function FertilityOverview({ fertility, onDayClick }: FertilityOverviewPr
       })}
       <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t">
         <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs bg-green-100 text-green-800">
-          + Positief (LH piek)
+          {t.fertility.lhPeak}
         </span>
         <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs bg-gray-100 text-gray-800">
-          − Negatief
+          − {t.fertility.negative}
         </span>
       </div>
     </>
@@ -268,10 +284,10 @@ export function FertilityOverview({ fertility, onDayClick }: FertilityOverviewPr
       })}
       <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t">
         <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs bg-red-50 text-red-800">
-          <Heart className="w-3 h-3 fill-red-500" /> Gemeenschap
+          <Heart className="w-3 h-3 fill-red-500" /> {t.fertility.intercourse}
         </span>
         <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs bg-purple-50 text-purple-800">
-          <Pill className="w-3 h-3" /> Supplementen
+          <Pill className="w-3 h-3" /> {t.fertility.supplements}
         </span>
       </div>
     </>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useLocalStorage } from "./useLocalStorage";
 import { generateId } from "@/lib/utils";
 import type {
@@ -17,13 +17,32 @@ import type {
   CervicalMucus,
   OvulationTest,
 } from "@/types";
-import { DEFAULT_CYCLE_DATA } from "@/types";
+import { DEFAULT_CYCLE_DATA, DEFAULT_NOTIFICATION_SETTINGS } from "@/types";
 
 export function useCycleData() {
   const [cycleData, setCycleData, isLoaded] = useLocalStorage<CycleData>(
     "menstruatie-kalender-data",
     DEFAULT_CYCLE_DATA
   );
+
+  // Migrate existing data to add notifications and language fields if missing
+  useEffect(() => {
+    if (isLoaded && cycleData.settings) {
+      const needsNotifications = !cycleData.settings.notifications;
+      const needsLanguage = !cycleData.settings.language;
+
+      if (needsNotifications || needsLanguage) {
+        setCycleData((prev) => ({
+          ...prev,
+          settings: {
+            ...prev.settings,
+            notifications: prev.settings.notifications || DEFAULT_NOTIFICATION_SETTINGS,
+            language: prev.settings.language || "nl",
+          },
+        }));
+      }
+    }
+  }, [isLoaded, cycleData.settings, setCycleData]);
 
   // Toggle period for a specific date
   const togglePeriodDay = useCallback(
@@ -288,6 +307,33 @@ export function useCycleData() {
     );
   }, [cycleData.periods]);
 
+  // Replace all data (used for import)
+  const replaceAllData = useCallback(
+    (data: CycleData) => {
+      setCycleData(data);
+    },
+    [setCycleData]
+  );
+
+  // Delete a specific category of data
+  const deleteDataCategory = useCallback(
+    (category: "periods" | "symptoms" | "fertility") => {
+      setCycleData((prev) => ({
+        ...prev,
+        [category]: [],
+      }));
+    },
+    [setCycleData]
+  );
+
+  // Delete all data and reset to defaults (keeps settings)
+  const deleteAllData = useCallback(() => {
+    setCycleData((prev) => ({
+      ...DEFAULT_CYCLE_DATA,
+      settings: prev.settings, // Preserve user settings
+    }));
+  }, [setCycleData]);
+
   return {
     cycleData,
     isLoaded,
@@ -298,5 +344,8 @@ export function useCycleData() {
     updateFertility,
     updateSettings,
     getSortedPeriods,
+    replaceAllData,
+    deleteDataCategory,
+    deleteAllData,
   };
 }

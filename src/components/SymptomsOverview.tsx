@@ -2,10 +2,11 @@
 
 import { useState, useMemo } from "react";
 import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, subMonths, addMonths } from "date-fns";
-import { nl } from "date-fns/locale";
+import { nl, enUS } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/contexts/LanguageContext";
 import type { DaySymptom } from "@/types";
 
 type ViewType = "recent" | "mood" | "pain" | "energy" | "notes";
@@ -14,38 +15,6 @@ interface SymptomsOverviewProps {
   symptoms: DaySymptom[];
   onDayClick: (dateString: string) => void;
 }
-
-const tabs: { value: ViewType; label: string }[] = [
-  { value: "recent", label: "Recent" },
-  { value: "mood", label: "Stemming" },
-  { value: "pain", label: "Pijn" },
-  { value: "energy", label: "Energie" },
-  { value: "notes", label: "Notities" },
-];
-
-const moodConfig: Record<string, { emoji: string; label: string; color: string }> = {
-  happy: { emoji: "😊", label: "Blij", color: "bg-green-100 text-green-800" },
-  neutral: { emoji: "😐", label: "Neutraal", color: "bg-gray-100 text-gray-800" },
-  irritable: { emoji: "😤", label: "Prikkelbaar", color: "bg-orange-100 text-orange-800" },
-  sad: { emoji: "😢", label: "Verdrietig", color: "bg-blue-100 text-blue-800" },
-  emotional: { emoji: "🥺", label: "Emotioneel", color: "bg-purple-100 text-purple-800" },
-};
-
-const painConfig: Record<string, { level: number; label: string; color: string }> = {
-  none: { level: 0, label: "Geen", color: "bg-green-100 text-green-800" },
-  light: { level: 1, label: "Licht", color: "bg-yellow-100 text-yellow-800" },
-  moderate: { level: 2, label: "Matig", color: "bg-orange-100 text-orange-800" },
-  intense: { level: 3, label: "Hevig", color: "bg-red-100 text-red-800" },
-  severe: { level: 4, label: "Ernstig", color: "bg-red-200 text-red-900" },
-};
-
-const energyConfig: { [key: number]: { label: string; color: string } } = {
-  1: { label: "Zeer laag", color: "bg-red-100 text-red-800" },
-  2: { label: "Laag", color: "bg-orange-100 text-orange-800" },
-  3: { label: "Normaal", color: "bg-gray-100 text-gray-800" },
-  4: { label: "Hoog", color: "bg-green-100 text-green-800" },
-  5: { label: "Zeer hoog", color: "bg-green-200 text-green-900" },
-};
 
 function PainBar({ level }: { level: number }) {
   return (
@@ -82,8 +51,53 @@ function EnergyBar({ level }: { level: number }) {
 }
 
 export function SymptomsOverview({ symptoms, onDayClick }: SymptomsOverviewProps) {
+  const { t, language } = useTranslation();
   const [activeTab, setActiveTab] = useState<ViewType>("recent");
   const [currentMonth, setCurrentMonth] = useState(new Date());
+
+  const dateLocale = language === "en" ? enUS : nl;
+
+  const tabs = useMemo(() => [
+    { value: "recent" as ViewType, label: t.symptoms.recent },
+    { value: "mood" as ViewType, label: t.dayDetail.mood },
+    { value: "pain" as ViewType, label: t.dayDetail.painLevel },
+    { value: "energy" as ViewType, label: t.dayDetail.energyLevel },
+    { value: "notes" as ViewType, label: t.dayDetail.notes },
+  ], [t]);
+
+  const moodConfig = useMemo(() => ({
+    happy: { emoji: "😊", label: t.moods.happy, color: "bg-green-100 text-green-800" },
+    neutral: { emoji: "😐", label: t.moods.neutral, color: "bg-gray-100 text-gray-800" },
+    irritable: { emoji: "😤", label: t.moods.irritable, color: "bg-orange-100 text-orange-800" },
+    sad: { emoji: "😢", label: t.moods.sad, color: "bg-blue-100 text-blue-800" },
+    emotional: { emoji: "🥺", label: t.moods.emotional, color: "bg-purple-100 text-purple-800" },
+  }), [t]);
+
+  const painConfig = useMemo(() => ({
+    none: { level: 0, label: t.pain.none, color: "bg-green-100 text-green-800" },
+    light: { level: 1, label: t.pain.light, color: "bg-yellow-100 text-yellow-800" },
+    moderate: { level: 2, label: t.pain.moderate, color: "bg-orange-100 text-orange-800" },
+    intense: { level: 3, label: t.pain.intense, color: "bg-red-100 text-red-800" },
+    severe: { level: 4, label: t.pain.severe, color: "bg-red-200 text-red-900" },
+  }), [t]);
+
+  const energyConfig = useMemo(() => ({
+    1: { label: t.energy.veryLow, color: "bg-red-100 text-red-800" },
+    2: { label: t.energy.low, color: "bg-orange-100 text-orange-800" },
+    3: { label: t.energy.normal, color: "bg-gray-100 text-gray-800" },
+    4: { label: t.energy.high, color: "bg-green-100 text-green-800" },
+    5: { label: t.energy.veryHigh, color: "bg-green-200 text-green-900" },
+  }), [t]);
+
+  const weekdays = useMemo(() => [
+    t.weekdaysShort.mon,
+    t.weekdaysShort.tue,
+    t.weekdaysShort.wed,
+    t.weekdaysShort.thu,
+    t.weekdaysShort.fri,
+    t.weekdaysShort.sat,
+    t.weekdaysShort.sun,
+  ], [t]);
 
   const symptomsByDate = useMemo(() => {
     const map = new Map<string, DaySymptom>();
@@ -127,7 +141,7 @@ export function SymptomsOverview({ symptoms, onDayClick }: SymptomsOverviewProps
         <ChevronLeft className="h-4 w-4" />
       </Button>
       <span className="text-sm font-medium capitalize">
-        {format(currentMonth, "MMMM yyyy", { locale: nl })}
+        {format(currentMonth, "MMMM yyyy", { locale: dateLocale })}
       </span>
       <Button
         variant="ghost"
@@ -141,7 +155,7 @@ export function SymptomsOverview({ symptoms, onDayClick }: SymptomsOverviewProps
 
   const renderCalendarGrid = (renderCell: (dateString: string) => React.ReactNode) => (
     <div className="grid grid-cols-7 gap-1">
-      {["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"].map((day) => (
+      {weekdays.map((day) => (
         <div key={day} className="text-center text-xs font-medium text-muted-foreground py-1">
           {day}
         </div>
@@ -171,8 +185,8 @@ export function SymptomsOverview({ symptoms, onDayClick }: SymptomsOverviewProps
     if (recentSymptoms.length === 0) {
       return (
         <div className="text-center py-8 text-muted-foreground">
-          <p>Nog geen symptomen geregistreerd.</p>
-          <p className="text-sm mt-1">Klik op een dag in de kalender om te beginnen.</p>
+          <p>{t.symptoms.noSymptomsYet}</p>
+          <p className="text-sm mt-1">{t.symptoms.clickDayToStart}</p>
         </div>
       );
     }
@@ -191,7 +205,7 @@ export function SymptomsOverview({ symptoms, onDayClick }: SymptomsOverviewProps
             >
               <div className="flex items-center justify-between">
                 <span className="font-medium text-sm">
-                  {format(parseISO(symptom.date), "EEE d MMM", { locale: nl })}
+                  {format(parseISO(symptom.date), "EEE d MMM", { locale: dateLocale })}
                 </span>
                 <div className="flex items-center gap-2">
                   {mood && <span>{mood.emoji}</span>}
@@ -271,7 +285,7 @@ export function SymptomsOverview({ symptoms, onDayClick }: SymptomsOverviewProps
       })}
       <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t">
         {[1, 2, 3, 4, 5].map((level) => {
-          const config = energyConfig[level];
+          const config = energyConfig[level as keyof typeof energyConfig];
           return (
             <span key={level} className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs ${config.color}`}>
               {level} {config.label}
@@ -287,7 +301,7 @@ export function SymptomsOverview({ symptoms, onDayClick }: SymptomsOverviewProps
       {renderMonthNav()}
       {notesForMonth.length === 0 ? (
         <p className="text-center text-muted-foreground py-8">
-          Geen notities deze maand.
+          {t.symptoms.noNotesThisMonth}
         </p>
       ) : (
         <div className="space-y-2">
@@ -298,7 +312,7 @@ export function SymptomsOverview({ symptoms, onDayClick }: SymptomsOverviewProps
               className="w-full p-3 rounded-lg bg-muted/50 border text-left hover:bg-muted transition-colors"
             >
               <p className="text-xs font-medium text-muted-foreground mb-1">
-                {format(item.date, "EEEE d MMMM", { locale: nl })}
+                {format(item.date, "EEEE d MMMM", { locale: dateLocale })}
               </p>
               <p className="text-sm">{item.notes}</p>
             </button>

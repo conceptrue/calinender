@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { format } from "date-fns";
+import { nl, enUS } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DayCell } from "@/components/DayCell";
+import { useTranslation } from "@/contexts/LanguageContext";
 import {
   generateCalendarGrid,
-  getMonthYear,
   navigateMonth,
-  WEEKDAY_LABELS,
 } from "@/lib/calendar";
 import type { CycleData } from "@/types";
 
@@ -27,8 +28,21 @@ export function Calendar({
   fertileDates,
   onDayClick,
 }: CalendarProps) {
+  const { t, language } = useTranslation();
   const [currentDate, setCurrentDate] = useState(new Date());
   const calendarDays = generateCalendarGrid(currentDate);
+
+  const dateLocale = language === "en" ? enUS : nl;
+
+  const weekdays = useMemo(() => [
+    t.weekdaysShort.mon,
+    t.weekdaysShort.tue,
+    t.weekdaysShort.wed,
+    t.weekdaysShort.thu,
+    t.weekdaysShort.fri,
+    t.weekdaysShort.sat,
+    t.weekdaysShort.sun,
+  ], [t]);
 
   const isPeriodDay = (dateString: string): boolean => {
     return cycleData.periods.some((period) => {
@@ -61,10 +75,10 @@ export function Calendar({
 
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-semibold capitalize">
-            {getMonthYear(currentDate)}
+            {format(currentDate, "MMMM yyyy", { locale: dateLocale })}
           </h2>
           <Button variant="ghost" size="sm" onClick={goToToday}>
-            Vandaag
+            {t.common.today}
           </Button>
         </div>
 
@@ -79,7 +93,7 @@ export function Calendar({
 
       {/* Weekday headers */}
       <div className="grid grid-cols-7 gap-1 mb-2">
-        {WEEKDAY_LABELS.map((day) => (
+        {weekdays.map((day) => (
           <div
             key={day}
             className="flex h-8 items-center justify-center text-xs font-medium text-muted-foreground"

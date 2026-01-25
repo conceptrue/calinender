@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/contexts/LanguageContext";
 import type { FertilityDay, Period } from "@/types";
 
 interface FertilityCalendarProps {
@@ -16,12 +17,6 @@ interface FertilityCalendarProps {
   onDayClick: (dateString: string) => void;
 }
 
-const DAYS_NL = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
-const MONTHS_NL = [
-  "januari", "februari", "maart", "april", "mei", "juni",
-  "juli", "augustus", "september", "oktober", "november", "december"
-];
-
 export function FertilityCalendar({
   fertility,
   periods,
@@ -30,7 +25,19 @@ export function FertilityCalendar({
   ovulationDay,
   onDayClick,
 }: FertilityCalendarProps) {
+  const { t } = useTranslation();
   const [currentMonth, setCurrentMonth] = useState(new Date());
+
+  const weekdays = useMemo(() => [
+    t.weekdaysShort.mon, t.weekdaysShort.tue, t.weekdaysShort.wed,
+    t.weekdaysShort.thu, t.weekdaysShort.fri, t.weekdaysShort.sat, t.weekdaysShort.sun
+  ], [t]);
+
+  const monthNames = useMemo(() => [
+    t.months.january, t.months.february, t.months.march, t.months.april,
+    t.months.may, t.months.june, t.months.july, t.months.august,
+    t.months.september, t.months.october, t.months.november, t.months.december
+  ], [t]);
 
   const calendarDays = useMemo(() => {
     const year = currentMonth.getFullYear();
@@ -141,10 +148,10 @@ export function FertilityCalendar({
 
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-semibold capitalize">
-            {MONTHS_NL[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+            {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
           </h2>
           <Button variant="ghost" size="sm" onClick={goToToday}>
-            Vandaag
+            {t.common.today}
           </Button>
         </div>
 
@@ -159,7 +166,7 @@ export function FertilityCalendar({
 
       {/* Day headers */}
       <div className="grid grid-cols-7 gap-1 mb-2">
-        {DAYS_NL.map((day) => (
+        {weekdays.map((day) => (
           <div
             key={day}
             className="flex items-center justify-center h-8 text-xs font-medium text-muted-foreground"
@@ -219,19 +226,19 @@ export function FertilityCalendar({
       <div className="flex flex-wrap gap-3 text-xs text-muted-foreground pt-3 mt-3 border-t">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded bg-rose-200" />
-          <span>Menstruatie</span>
+          <span>{t.phases.menstruation}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded bg-green-100 border border-green-200" />
-          <span>Vruchtbaar</span>
+          <span>{t.cycle.fertile}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded bg-purple-200" />
-          <span>Ovulatie</span>
+          <span>{t.cycle.ovulation}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-1.5 h-1.5 rounded-full bg-pink-500" />
-          <span>Data ingevuld</span>
+          <span>{t.fertility.dataFilled}</span>
         </div>
       </div>
     </div>

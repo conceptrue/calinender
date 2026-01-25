@@ -2,11 +2,13 @@
 
 import { useState, useMemo } from "react";
 import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, subMonths, addMonths } from "date-fns";
-import { nl } from "date-fns/locale";
+import { nl, enUS } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/contexts/LanguageContext";
 import type { DaySymptom } from "@/types";
+import type { Translations } from "@/i18n/types";
 
 type ViewType = "plan" | "fases" | "recent" | "calendar";
 
@@ -17,16 +19,18 @@ interface ExerciseOverviewProps {
   cycleLength: number;
 }
 
-const exerciseConfig: Record<string, { emoji: string; label: string; color: string }> = {
-  walking: { emoji: "🚶", label: "Wandelen", color: "bg-blue-100 text-blue-800" },
-  running: { emoji: "🏃", label: "Hardlopen", color: "bg-blue-200 text-blue-900" },
-  cycling: { emoji: "🚴", label: "Fietsen", color: "bg-green-100 text-green-800" },
-  swimming: { emoji: "🏊", label: "Zwemmen", color: "bg-cyan-100 text-cyan-800" },
-  gym: { emoji: "🏋️", label: "Fitness", color: "bg-orange-100 text-orange-800" },
-  yoga: { emoji: "🧘", label: "Yoga", color: "bg-purple-100 text-purple-800" },
-  sports: { emoji: "⚽", label: "Sport", color: "bg-yellow-100 text-yellow-800" },
-  other: { emoji: "💪", label: "Anders", color: "bg-gray-100 text-gray-800" },
-};
+function getExerciseConfig(t: Translations) {
+  return {
+    walking: { emoji: "🚶", label: t.exercise.walking, color: "bg-blue-100 text-blue-800" },
+    running: { emoji: "🏃", label: t.exercise.running, color: "bg-blue-200 text-blue-900" },
+    cycling: { emoji: "🚴", label: t.exercise.cycling, color: "bg-green-100 text-green-800" },
+    swimming: { emoji: "🏊", label: t.exercise.swimming, color: "bg-cyan-100 text-cyan-800" },
+    gym: { emoji: "🏋️", label: t.exercise.gym, color: "bg-orange-100 text-orange-800" },
+    yoga: { emoji: "🧘", label: t.exercise.yoga, color: "bg-purple-100 text-purple-800" },
+    sports: { emoji: "⚽", label: t.exercise.sports, color: "bg-yellow-100 text-yellow-800" },
+    other: { emoji: "💪", label: t.exercise.other, color: "bg-gray-100 text-gray-800" },
+  };
+}
 
 interface CyclePhase {
   name: string;
@@ -40,86 +44,100 @@ interface CyclePhase {
   avoid: string[];
 }
 
-function getCyclePhase(cycleDay: number, cycleLength: number): CyclePhase {
+function getCyclePhase(cycleDay: number, cycleLength: number, t: Translations): CyclePhase {
   const ovulationDay = Math.round(cycleLength / 2);
 
-  // Menstruatie (dag 1-5)
+  // Menstruation (day 1-5)
   if (cycleDay <= 5) {
     return {
-      name: "Menstruatie",
+      name: t.phases.menstruation,
       emoji: "🌙",
-      energyLevel: "Laag",
+      energyLevel: t.energy.low,
       color: "text-red-700",
       bgColor: "bg-red-50",
-      intensity: "Licht",
-      description: "Je lichaam heeft rust nodig. Focus op zachte beweging en herstel.",
-      recommended: ["🚶 Wandelen", "🧘 Yoga", "🏊 Zwemmen", "🧘 Stretchen"],
-      avoid: ["🏋️ Intensieve fitness", "🏃 Hardlopen", "⚽ Competitiesport"],
+      intensity: t.exercise.lightIntensity,
+      description: t.exercise.menstruationDesc,
+      recommended: [t.exercise.walkingRec, t.exercise.yogaRec, t.exercise.swimmingRec, t.exercise.stretchingRec],
+      avoid: [t.exercise.intensiveGym, t.exercise.runningRec, t.exercise.competitionSports],
     };
   }
 
-  // Folliculaire fase (dag 6 tot ovulatie)
+  // Follicular phase (day 6 to ovulation)
   if (cycleDay <= ovulationDay - 2) {
     return {
-      name: "Folliculaire fase",
+      name: t.phases.follicular,
       emoji: "🌱",
-      energyLevel: "Stijgend",
+      energyLevel: t.energy.rising,
       color: "text-green-700",
       bgColor: "bg-green-50",
-      intensity: "Matig tot hoog",
-      description: "Je energie neemt toe! Ideaal moment om nieuwe uitdagingen aan te gaan.",
-      recommended: ["🏃 Hardlopen", "🚴 Fietsen", "🏋️ Krachttraining", "⚽ Teamsport"],
+      intensity: t.exercise.moderateToHigh,
+      description: t.exercise.follicularDesc,
+      recommended: [t.exercise.runningRec, t.exercise.cyclingRec, t.exercise.strengthRec, t.exercise.teamSportsRec],
       avoid: [],
     };
   }
 
-  // Ovulatie (rond dag 14)
+  // Ovulation (around day 14)
   if (cycleDay <= ovulationDay + 2) {
     return {
-      name: "Ovulatie",
+      name: t.phases.ovulation,
       emoji: "☀️",
-      energyLevel: "Piek",
+      energyLevel: t.energy.peak,
       color: "text-yellow-700",
       bgColor: "bg-yellow-50",
-      intensity: "Hoog",
-      description: "Je bent op je sterkst! Perfecte tijd voor intensieve training en PR's.",
-      recommended: ["🏋️ Zware krachttraining", "🏃 Intervaltraining", "⚽ Wedstrijden", "🚴 Lange fietstochten"],
+      intensity: t.exercise.highIntensity,
+      description: t.exercise.ovulationDesc,
+      recommended: [t.exercise.heavyStrength, t.exercise.intervalTraining, t.exercise.competitions, t.exercise.longCycling],
       avoid: [],
     };
   }
 
-  // Vroege luteale fase (na ovulatie, eerste helft)
+  // Early luteal phase (after ovulation, first half)
   if (cycleDay <= ovulationDay + 7) {
     return {
-      name: "Vroege luteale fase",
+      name: t.phases.earlyLuteal,
       emoji: "🍂",
-      energyLevel: "Stabiel",
+      energyLevel: t.energy.stable,
       color: "text-orange-700",
       bgColor: "bg-orange-50",
-      intensity: "Matig",
-      description: "Energie is nog goed maar begint af te nemen. Geniet van je training.",
-      recommended: ["🚴 Fietsen", "🏊 Zwemmen", "🧘 Yoga", "🚶 Wandelen"],
-      avoid: ["🏋️ Extreem zware training"],
+      intensity: t.exercise.moderateIntensity,
+      description: t.exercise.earlyLutealDesc,
+      recommended: [t.exercise.cyclingRec, t.exercise.swimmingRec, t.exercise.yogaRec, t.exercise.walkingRec],
+      avoid: [t.exercise.extremeHeavy],
     };
   }
 
-  // Late luteale fase (PMS periode)
+  // Late luteal phase (PMS period)
   return {
-    name: "Late luteale fase",
+    name: t.phases.lateLuteal,
     emoji: "🌧️",
-    energyLevel: "Dalend",
+    energyLevel: t.energy.declining,
     color: "text-purple-700",
     bgColor: "bg-purple-50",
-    intensity: "Licht tot matig",
-    description: "Luister naar je lichaam. Kies voor rustgevende beweging.",
-    recommended: ["🚶 Wandelen", "🧘 Rustige yoga", "🏊 Zwemmen", "🧘 Meditatie"],
-    avoid: ["🏃 Intensief cardio", "🏋️ Zware gewichten"],
+    intensity: t.exercise.lightToModerate,
+    description: t.exercise.lateLutealDesc,
+    recommended: [t.exercise.walkingRec, t.exercise.calmYoga, t.exercise.swimmingRec, t.exercise.meditation],
+    avoid: [t.exercise.intensiveCardio, t.exercise.heavyWeights],
   };
 }
 
 export function ExerciseOverview({ symptoms, onDayClick, currentCycleDay, cycleLength }: ExerciseOverviewProps) {
+  const { t, language } = useTranslation();
   const [activeTab, setActiveTab] = useState<ViewType>("plan");
   const [currentMonth, setCurrentMonth] = useState(new Date());
+
+  const dateLocale = language === "en" ? enUS : nl;
+  const exerciseConfig = useMemo(() => getExerciseConfig(t), [t]);
+
+  const weekdays = useMemo(() => [
+    t.weekdaysShort.mon,
+    t.weekdaysShort.tue,
+    t.weekdaysShort.wed,
+    t.weekdaysShort.thu,
+    t.weekdaysShort.fri,
+    t.weekdaysShort.sat,
+    t.weekdaysShort.sun,
+  ], [t]);
 
   const symptomsByDate = useMemo(() => {
     const map = new Map<string, DaySymptom>();
@@ -142,25 +160,25 @@ export function ExerciseOverview({ symptoms, onDayClick, currentCycleDay, cycleL
 
   const currentPhase = useMemo(() => {
     if (!currentCycleDay) return null;
-    return getCyclePhase(currentCycleDay, cycleLength);
-  }, [currentCycleDay, cycleLength]);
+    return getCyclePhase(currentCycleDay, cycleLength, t);
+  }, [currentCycleDay, cycleLength, t]);
 
   const allPhases = useMemo(() => {
     const ovulationDay = Math.round(cycleLength / 2);
     return [
-      { day: 3, phase: getCyclePhase(3, cycleLength) },
-      { day: ovulationDay - 4, phase: getCyclePhase(ovulationDay - 4, cycleLength) },
-      { day: ovulationDay, phase: getCyclePhase(ovulationDay, cycleLength) },
-      { day: ovulationDay + 4, phase: getCyclePhase(ovulationDay + 4, cycleLength) },
-      { day: cycleLength - 3, phase: getCyclePhase(cycleLength - 3, cycleLength) },
+      { day: 3, phase: getCyclePhase(3, cycleLength, t) },
+      { day: ovulationDay - 4, phase: getCyclePhase(ovulationDay - 4, cycleLength, t) },
+      { day: ovulationDay, phase: getCyclePhase(ovulationDay, cycleLength, t) },
+      { day: ovulationDay + 4, phase: getCyclePhase(ovulationDay + 4, cycleLength, t) },
+      { day: cycleLength - 3, phase: getCyclePhase(cycleLength - 3, cycleLength, t) },
     ];
-  }, [cycleLength]);
+  }, [cycleLength, t]);
 
   const renderPlanView = () => {
     if (!currentCycleDay || !currentPhase) {
       return (
         <div className="text-center py-6 text-muted-foreground">
-          <p>Registreer eerst een periode om je bewegingsplan te zien.</p>
+          <p>{t.exercise.registerPeriodFirst}</p>
         </div>
       );
     }
@@ -173,18 +191,18 @@ export function ExerciseOverview({ symptoms, onDayClick, currentCycleDay, cycleL
             <span className="text-3xl">{currentPhase.emoji}</span>
             <div>
               <h4 className={`font-semibold ${currentPhase.color}`}>{currentPhase.name}</h4>
-              <p className="text-sm text-muted-foreground">Dag {currentCycleDay} van je cyclus</p>
+              <p className="text-sm text-muted-foreground">{t.common.day} {currentCycleDay} {t.cycle.ofYourCycle}</p>
             </div>
           </div>
           <p className="text-sm mb-3">{currentPhase.description}</p>
 
           <div className="flex gap-4 text-sm">
             <div>
-              <span className="text-muted-foreground">Energie:</span>
+              <span className="text-muted-foreground">{t.dayDetail.energyLevel}:</span>
               <span className={`ml-1 font-medium ${currentPhase.color}`}>{currentPhase.energyLevel}</span>
             </div>
             <div>
-              <span className="text-muted-foreground">Intensiteit:</span>
+              <span className="text-muted-foreground">{t.exercise.intensity}:</span>
               <span className={`ml-1 font-medium ${currentPhase.color}`}>{currentPhase.intensity}</span>
             </div>
           </div>
@@ -192,7 +210,7 @@ export function ExerciseOverview({ symptoms, onDayClick, currentCycleDay, cycleL
 
         {/* Recommendations */}
         <div className="border rounded-lg p-4">
-          <h4 className="font-medium text-green-700 mb-2">✓ Aanbevolen</h4>
+          <h4 className="font-medium text-green-700 mb-2">✓ {t.exercise.recommended}</h4>
           <div className="flex flex-wrap gap-2">
             {currentPhase.recommended.map((item) => (
               <span key={item} className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm">
@@ -204,7 +222,7 @@ export function ExerciseOverview({ symptoms, onDayClick, currentCycleDay, cycleL
 
         {currentPhase.avoid.length > 0 && (
           <div className="border rounded-lg p-4">
-            <h4 className="font-medium text-red-700 mb-2">✗ Vermijd</h4>
+            <h4 className="font-medium text-red-700 mb-2">✗ {t.exercise.avoid}</h4>
             <div className="flex flex-wrap gap-2">
               {currentPhase.avoid.map((item) => (
                 <span key={item} className="px-3 py-1 bg-red-50 text-red-700 rounded-full text-sm">
@@ -217,12 +235,12 @@ export function ExerciseOverview({ symptoms, onDayClick, currentCycleDay, cycleL
 
         {/* Weekly Overview */}
         <div className="border rounded-lg p-4">
-          <h4 className="font-medium mb-3">Komende 7 dagen</h4>
+          <h4 className="font-medium mb-3">{t.nutrition.next7Days}</h4>
           <div className="space-y-2">
             {[0, 1, 2, 3, 4, 5, 6].map((offset) => {
               const futureDay = currentCycleDay + offset;
               const adjustedDay = futureDay > cycleLength ? futureDay - cycleLength : futureDay;
-              const phase = getCyclePhase(adjustedDay, cycleLength);
+              const phase = getCyclePhase(adjustedDay, cycleLength, t);
               const date = new Date();
               date.setDate(date.getDate() + offset);
 
@@ -230,7 +248,7 @@ export function ExerciseOverview({ symptoms, onDayClick, currentCycleDay, cycleL
                 <div key={offset} className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
                     <span className="w-16 text-muted-foreground">
-                      {offset === 0 ? "Vandaag" : format(date, "EEE d", { locale: nl })}
+                      {offset === 0 ? t.common.today : format(date, "EEE d", { locale: dateLocale })}
                     </span>
                     <span>{phase.emoji}</span>
                     <span className={phase.color}>{phase.name}</span>
@@ -269,13 +287,13 @@ export function ExerciseOverview({ symptoms, onDayClick, currentCycleDay, cycleL
                         {phase.name}
                         {isCurrentPhase && (
                           <span className="ml-2 text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
-                            Nu
+                            {t.phases.now}
                           </span>
                         )}
                       </h4>
                       <div className="flex gap-3 text-xs text-muted-foreground">
-                        <span>Energie: {phase.energyLevel}</span>
-                        <span>Intensiteit: {phase.intensity}</span>
+                        <span>{t.dayDetail.energyLevel}: {phase.energyLevel}</span>
+                        <span>{t.exercise.intensity}: {phase.intensity}</span>
                       </div>
                     </div>
                   </div>
@@ -287,7 +305,7 @@ export function ExerciseOverview({ symptoms, onDayClick, currentCycleDay, cycleL
               <div className="p-4 space-y-3">
                 {/* Recommended */}
                 <div>
-                  <h5 className="text-sm font-medium text-green-700 mb-2">✓ Aanbevolen</h5>
+                  <h5 className="text-sm font-medium text-green-700 mb-2">✓ {t.exercise.recommended}</h5>
                   <div className="flex flex-wrap gap-1.5">
                     {phase.recommended.map((item) => (
                       <span key={item} className="px-2 py-0.5 bg-green-50 text-green-700 rounded-full text-xs">
@@ -300,7 +318,7 @@ export function ExerciseOverview({ symptoms, onDayClick, currentCycleDay, cycleL
                 {/* Avoid */}
                 {phase.avoid.length > 0 && (
                   <div>
-                    <h5 className="text-sm font-medium text-red-700 mb-2">✗ Vermijd</h5>
+                    <h5 className="text-sm font-medium text-red-700 mb-2">✗ {t.exercise.avoid}</h5>
                     <div className="flex flex-wrap gap-1.5">
                       {phase.avoid.map((item) => (
                         <span key={item} className="px-2 py-0.5 bg-red-50 text-red-700 rounded-full text-xs">
@@ -322,8 +340,8 @@ export function ExerciseOverview({ symptoms, onDayClick, currentCycleDay, cycleL
     if (recentExercise.length === 0) {
       return (
         <div className="text-center py-6 text-muted-foreground">
-          <p>Nog geen beweging geregistreerd.</p>
-          <p className="text-sm mt-1">Klik op een dag om te beginnen.</p>
+          <p>{t.exercise.noDataYet}</p>
+          <p className="text-sm mt-1">{t.exercise.clickToStart}</p>
         </div>
       );
     }
@@ -341,7 +359,7 @@ export function ExerciseOverview({ symptoms, onDayClick, currentCycleDay, cycleL
               className="w-full p-3 rounded-lg border hover:bg-muted/50 transition-colors text-left flex items-center justify-between"
             >
               <span className="font-medium text-sm">
-                {format(parseISO(symptom.date), "EEE d MMM", { locale: nl })}
+                {format(parseISO(symptom.date), "EEE d MMM", { locale: dateLocale })}
               </span>
               <div className="flex items-center gap-2">
                 <span className={`inline-flex items-center gap-2 px-2 py-1 rounded-full text-sm ${exercise.color}`}>
@@ -371,7 +389,7 @@ export function ExerciseOverview({ symptoms, onDayClick, currentCycleDay, cycleL
           <ChevronLeft className="h-4 w-4" />
         </Button>
         <span className="text-sm font-medium capitalize">
-          {format(currentMonth, "MMMM yyyy", { locale: nl })}
+          {format(currentMonth, "MMMM yyyy", { locale: dateLocale })}
         </span>
         <Button
           variant="ghost"
@@ -383,7 +401,7 @@ export function ExerciseOverview({ symptoms, onDayClick, currentCycleDay, cycleL
       </div>
 
       <div className="grid grid-cols-7 gap-1">
-        {["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"].map((day) => (
+        {weekdays.map((day) => (
           <div key={day} className="text-center text-xs font-medium text-muted-foreground py-1">
             {day}
           </div>
@@ -441,7 +459,7 @@ export function ExerciseOverview({ symptoms, onDayClick, currentCycleDay, cycleL
           )}
         >
           <span>📋</span>
-          <span>Plan</span>
+          <span>{t.exercise.plan}</span>
         </button>
         <button
           onClick={() => setActiveTab("fases")}
@@ -453,7 +471,7 @@ export function ExerciseOverview({ symptoms, onDayClick, currentCycleDay, cycleL
           )}
         >
           <span>🔄</span>
-          <span>Fases</span>
+          <span>{t.exercise.phases}</span>
         </button>
         <button
           onClick={() => setActiveTab("recent")}
@@ -465,7 +483,7 @@ export function ExerciseOverview({ symptoms, onDayClick, currentCycleDay, cycleL
           )}
         >
           <span>🏃</span>
-          <span>Activiteit</span>
+          <span>{t.exercise.activity}</span>
         </button>
         <button
           onClick={() => setActiveTab("calendar")}
@@ -477,7 +495,7 @@ export function ExerciseOverview({ symptoms, onDayClick, currentCycleDay, cycleL
           )}
         >
           <span>📅</span>
-          <span>Kalender</span>
+          <span>{t.exercise.calendar}</span>
         </button>
       </div>
 
